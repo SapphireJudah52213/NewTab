@@ -573,17 +573,25 @@ body {
 
 .clock {
 
-    text-align:
-        center;
+    position: fixed;
+
+    top: -210px;
+
+    left: 50%;
+
+    transform: translateX(-50%);
+
+    /*text-align:
+        center;*/
 
     margin-bottom:
-        13px;
+        0px;
 
     color:
         rgba(255,255,255,.7);
 
     font-size:
-        16px;
+        20px;
 
     font-variant-numeric:
         tabular-nums;
@@ -2699,14 +2707,14 @@ function updateClock() {
         const milliseconds =
             String(now.getMilliseconds()).padStart(2, "0").trim();
 
-        time += "." + milliseconds.replace(" ", "");
+        time += "." + milliseconds.toString().slice(milliseconds.length - 2);
 
     }
 
     time = time.replaceAll("AM", "");
     time = time.replaceAll("PM", "");
 
-    time = time.trim();
+    time = time.replaceAll(" ", "");
 
     clock.textContent = time;
 
