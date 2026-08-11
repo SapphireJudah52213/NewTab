@@ -10,17 +10,6 @@
 <style>
 
 /* ============================================================
-   PERFORMANCE NOTES
-   ============================================================
-
-   The orb intentionally avoids a huge filter: blur() animation.
-
-   Instead, the softness is created with radial gradients.
-   This is considerably cheaper for the browser to render.
-   ============================================================ */
-
-
-/* ============================================================
    VARIABLES
    ============================================================ */
 
@@ -29,19 +18,16 @@
     --accent: #8ab4f8;
 
     --orb-size: 520px;
-
     --orb-opacity: .72;
-
     --orb-x: 50%;
     --orb-y: 38%;
 
     --orb-softness: 45%;
-
     --orb-glow: 1;
 
-    --orb-color-1: #4285f4;
-    --orb-color-2: #9b72ff;
-    --orb-color-3: #00c8ff;
+    --orb-background: transparent;
+    --orb-ambient: transparent;
+    --orb-center: transparent;
 
     --background-blur: 0px;
 
@@ -51,6 +37,8 @@
     --border:
         rgba(255,255,255,.11);
 
+    --transparency: .58;
+    --blur: 10px;
 }
 
 
@@ -62,7 +50,6 @@
     box-sizing: border-box;
 }
 
-
 html,
 body {
 
@@ -70,9 +57,7 @@ body {
     height: 100%;
 
     margin: 0;
-
 }
-
 
 body {
 
@@ -91,7 +76,6 @@ body {
 
     background:
         #0c0d10;
-
 }
 
 
@@ -114,15 +98,7 @@ body {
 
     transition:
         opacity .25s ease;
-
 }
-
-
-/* ============================================================
-   BACKGROUND OVERLAY
-
-   A cheap dark overlay instead of another blurred layer.
-   ============================================================ */
 
 .background-overlay {
 
@@ -136,16 +112,11 @@ body {
 
     background:
         rgba(0,0,0,.22);
-
 }
 
 
 /* ============================================================
    ORB
-   ============================================================ */
-
-/* ============================================================
-   GLOWING ORB
    ============================================================ */
 
 .orb {
@@ -165,53 +136,13 @@ body {
 
     pointer-events: none;
 
-    opacity: var(--orb-opacity);
+    opacity:
+        var(--orb-opacity);
 
     border-radius: 50%;
 
-    /*
-       The orb is mostly transparent.
-
-       The colors are concentrated toward the center and
-       gradually disappear outward, creating the appearance
-       of light rather than a solid object.
-    */
-
     background:
-
-        radial-gradient(
-            circle at 25% 30%,
-            color-mix(
-                in srgb,
-                var(--orb-color-1) 90%,
-                transparent
-            ) 0%,
-            transparent 55%
-        ),
-
-        radial-gradient(
-            circle at 72% 35%,
-            color-mix(
-                in srgb,
-                var(--orb-color-2) 85%,
-                transparent
-            ) 0%,
-            transparent 58%
-        ),
-
-        radial-gradient(
-            circle at 55% 78%,
-            color-mix(
-                in srgb,
-                var(--orb-color-3) 80%,
-                transparent
-            ) 0%,
-            transparent 55%
-        );
-
-    /*
-       The outer edge fades completely away.
-    */
+        var(--orb-background);
 
     mask-image:
         radial-gradient(
@@ -232,12 +163,11 @@ body {
             rgba(0,0,0,.35) 62%,
             transparent 88%
         );
-
 }
 
 
 /* ============================================================
-   CENTRAL LIGHT
+   ORB CENTRAL LIGHT
    ============================================================ */
 
 .orb::before {
@@ -251,26 +181,15 @@ body {
     border-radius: 50%;
 
     background:
-
-        radial-gradient(
-            circle,
-            rgba(255,255,255,.38) 0%,
-            color-mix(
-                in srgb,
-                var(--orb-color-1) 35%,
-                transparent
-            ) 18%,
-            transparent 62%
-        );
+        var(--orb-center);
 
     opacity:
         calc(var(--orb-glow) * .8);
-
 }
 
 
 /* ============================================================
-   WIDE AMBIENT LIGHT
+   ORB AMBIENT LIGHT
    ============================================================ */
 
 .orb::after {
@@ -279,51 +198,18 @@ body {
 
     position: absolute;
 
-    /*
-       Much larger than the visible orb.
-       This creates the surrounding glow.
-    */
-
     inset: -45%;
 
     border-radius: 50%;
 
     background:
-
-        radial-gradient(
-            circle,
-            color-mix(
-                in srgb,
-                var(--orb-color-1) 18%,
-                transparent
-            ) 0%,
-
-            color-mix(
-                in srgb,
-                var(--orb-color-2) 12%,
-                transparent
-            ) 25%,
-
-            color-mix(
-                in srgb,
-                var(--orb-color-3) 7%,
-                transparent
-            ) 40%,
-
-            transparent 70%
-        );
+        var(--orb-ambient);
 
     opacity:
         calc(var(--orb-glow) * .75);
 
-    /*
-       One static blur is fine.
-       Nothing is continuously animated.
-    */
-
     filter:
         blur(22px);
-
 }
 
 
@@ -334,14 +220,14 @@ body {
 .orb-preview {
 
     width: 100%;
-    height: 90px;
+    height: 110px;
 
     margin-bottom: 18px;
 
     border:
         1px solid var(--border);
 
-    border-radius: 15px;
+    border-radius: 16px;
 
     overflow: hidden;
 
@@ -349,9 +235,7 @@ body {
         #0d0e11;
 
     position: relative;
-
 }
-
 
 .orb-preview::before {
 
@@ -359,8 +243,8 @@ body {
 
     position: absolute;
 
-    width: 170px;
-    height: 170px;
+    width: 190px;
+    height: 190px;
 
     left: 50%;
     top: 50%;
@@ -371,24 +255,7 @@ body {
     border-radius: 50%;
 
     background:
-
-        radial-gradient(
-            circle at 25% 30%,
-            var(--orb-color-1) 0%,
-            transparent 52%
-        ),
-
-        radial-gradient(
-            circle at 72% 35%,
-            var(--orb-color-2) 0%,
-            transparent 55%
-        ),
-
-        radial-gradient(
-            circle at 55% 78%,
-            var(--orb-color-3) 0%,
-            transparent 55%
-        );
+        var(--orb-background);
 
     mask-image:
         radial-gradient(
@@ -408,9 +275,7 @@ body {
 
     filter:
         blur(5px);
-
 }
-
 
 .orb-preview::after {
 
@@ -421,27 +286,10 @@ body {
     inset: -40%;
 
     background:
-
-        radial-gradient(
-            circle,
-            color-mix(
-                in srgb,
-                var(--orb-color-1) 20%,
-                transparent
-            ) 0%,
-
-            color-mix(
-                in srgb,
-                var(--orb-color-2) 12%,
-                transparent
-            ) 30%,
-
-            transparent 70%
-        );
+        var(--orb-ambient);
 
     filter:
         blur(12px);
-
 }
 
 
@@ -471,7 +319,6 @@ body {
 
     flex-direction:
         column;
-
 }
 
 
@@ -489,9 +336,7 @@ body {
 
     gap:
         8px;
-
 }
-
 
 .top-button {
 
@@ -508,7 +353,7 @@ body {
         50%;
 
     background:
-        rgba(25,25,28,.55);
+        rgba(25,25,28,var(--transparency));
 
     color:
         white;
@@ -519,24 +364,16 @@ body {
     font-size:
         18px;
 
-    /*
-       Only blur small controls.
-       The previous version used large-area
-       backdrop filters everywhere.
-    */
-
     backdrop-filter:
-        blur(10px);
+        blur(var(--blur));
 
     -webkit-backdrop-filter:
-        blur(10px);
+        blur(var(--blur));
 
     transition:
         transform .15s ease,
         background .15s ease;
-
 }
-
 
 .top-button:hover {
 
@@ -544,8 +381,7 @@ body {
         scale(1.05);
 
     background:
-        rgba(55,55,60,.7);
-
+        rgba(55,55,60,var(--transparency));
 }
 
 
@@ -563,7 +399,6 @@ body {
 
     transform:
         translateY(-30px);
-
 }
 
 
@@ -579,13 +414,8 @@ body {
 
     left: 50%;
 
-    transform: translateX(-50%);
-
-    /*text-align:
-        center;*/
-
-    margin-bottom:
-        0px;
+    transform:
+        translateX(-50%);
 
     color:
         rgba(255,255,255,.7);
@@ -595,7 +425,6 @@ body {
 
     font-variant-numeric:
         tabular-nums;
-
 }
 
 
@@ -627,7 +456,6 @@ body {
             var(--accent) 20%,
             transparent
         );
-
 }
 
 
@@ -659,23 +487,17 @@ body {
         30px;
 
     background:
-        rgba(25,25,29,.32);
-
-    /*
-       Small blur area only.
-    */
+        rgba(25,25,29,var(--transparency));
 
     backdrop-filter:
-        blur(10px);
+        blur(var(--blur));
 
     -webkit-backdrop-filter:
-        blur(10px);
+        blur(var(--blur));
 
     transition:
         border-color .15s ease;
-
 }
-
 
 .search:focus-within {
 
@@ -685,22 +507,16 @@ body {
             var(--accent) 55%,
             transparent
         );
-
 }
-
 
 .search-icon {
 
     margin-right:
         11px;
 
-    opacity:
-        1;
-
-    color: rgb(150,150,150);
-
+    color:
+        white;
 }
-
 
 .search input {
 
@@ -724,17 +540,13 @@ body {
 
     font-size:
         16px;
-
 }
-
 
 .search input::placeholder {
 
     color:
         #888;
-
 }
-
 
 .search-key {
 
@@ -752,7 +564,6 @@ body {
 
     font-size:
         10px;
-
 }
 
 
@@ -776,9 +587,7 @@ body {
 
     gap:
         11px;
-
 }
-
 
 .shortcut {
 
@@ -792,19 +601,19 @@ body {
         14px;
 
     border:
-        1px solid var(--border);
+        1px solid var(--accent);
 
     border-radius:
         16px;
 
     background:
-        rgba(25,25,29,.58);
+        rgba(25,25,29,var(--transparency));
 
     backdrop-filter:
-        blur(8px);
+        blur(var(--blur));
 
     -webkit-backdrop-filter:
-        blur(8px);
+        blur(var(--blur));
 
     cursor:
         pointer;
@@ -815,9 +624,7 @@ body {
     transition:
         transform .14s ease,
         background .14s ease;
-
 }
-
 
 .shortcut:hover {
 
@@ -825,18 +632,14 @@ body {
         translateY(-2px);
 
     background:
-        rgba(50,50,55,.68);
-
+        rgba(50,50,55,var(--transparency));
 }
-
 
 .shortcut.dragging {
 
     opacity:
         .35;
-
 }
-
 
 .shortcut-icon {
 
@@ -866,9 +669,7 @@ body {
 
     overflow:
         hidden;
-
 }
-
 
 .shortcut-icon img {
 
@@ -880,9 +681,7 @@ body {
 
     object-fit:
         contain;
-
 }
-
 
 .shortcut-fallback {
 
@@ -891,9 +690,7 @@ body {
 
     font-weight:
         650;
-
 }
-
 
 .shortcut-name {
 
@@ -911,9 +708,7 @@ body {
 
     white-space:
         nowrap;
-
 }
-
 
 .shortcut-url {
 
@@ -934,9 +729,7 @@ body {
 
     white-space:
         nowrap;
-
 }
-
 
 .shortcut-menu {
 
@@ -972,16 +765,13 @@ body {
 
     opacity:
         0;
-
 }
-
 
 .shortcut:hover
 .shortcut-menu {
 
     opacity:
         1;
-
 }
 
 
@@ -1002,7 +792,6 @@ body {
 
     font-size:
         10px;
-
 }
 
 
@@ -1025,16 +814,13 @@ body {
         none;
 
     background:
-        rgba(0,0,0,.35);
-
+        rgba(0,0,0,.15);
 }
-
 
 .overlay.open {
 
     display:
         block;
-
 }
 
 
@@ -1057,7 +843,7 @@ body {
         72px;
 
     width:
-        370px;
+        390px;
 
     max-width:
         calc(100vw - 30px);
@@ -1069,7 +855,7 @@ body {
         auto;
 
     padding:
-        21px;
+        14px;
 
     border:
         1px solid var(--border);
@@ -1078,7 +864,13 @@ body {
         20px;
 
     background:
-        rgba(20,20,23,.97);
+        rgba(20,20,23,var(--transparency));
+
+    backdrop-filter:
+        blur(var(--blur));
+
+    -webkit-backdrop-filter:
+        blur(var(--blur));
 
     box-shadow:
         0 25px 70px rgba(0,0,0,.55);
@@ -1086,16 +878,20 @@ body {
     display:
         none;
 
+    scrollbar-width:
+        thin;
 }
-
 
 .settings.open {
 
     display:
         block;
-
 }
 
+
+/* ============================================================
+   SETTINGS HEADER
+   ============================================================ */
 
 .settings-header {
 
@@ -1108,11 +904,9 @@ body {
     align-items:
         center;
 
-    margin-bottom:
-        20px;
-
+    padding:
+        7px 7px 14px;
 }
-
 
 .settings h2 {
 
@@ -1121,47 +915,187 @@ body {
 
     font-size:
         20px;
-
 }
 
+.settings-subtitle {
+
+    margin-top:
+        3px;
+
+    color:
+        #777;
+
+    font-size:
+        11px;
+}
 
 .close-settings {
 
     width:
-        30px;
+        34px;
 
     height:
-        30px;
+        34px;
 
     border:
         0;
 
+    border-radius:
+        50%;
+
     background:
-        transparent;
+        rgba(255,255,255,.06);
 
     color:
         #aaa;
 
     font-size:
-        23px;
+        22px;
 
     cursor:
         pointer;
+}
 
+.close-settings:hover {
+
+    background:
+        rgba(255,255,255,.1);
+
+    color:
+        white;
 }
 
 
 /* ============================================================
-   SETTINGS
+   SETTINGS SECTIONS
+   ============================================================ */
+
+.settings-section {
+
+    border:
+        1px solid rgba(255,255,255,.08);
+
+    border-radius:
+        14px;
+
+    margin-bottom:
+        9px;
+
+    overflow:
+        hidden;
+
+    background:
+        rgba(255,255,255,.025);
+}
+
+.settings-section summary {
+
+    list-style:
+        none;
+
+    cursor:
+        pointer;
+
+    padding:
+        14px;
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    gap:
+        10px;
+
+    font-size:
+        13px;
+
+    font-weight:
+        650;
+
+    user-select:
+        none;
+}
+
+.settings-section summary::-webkit-details-marker {
+    display: none;
+}
+
+.settings-section summary::after {
+
+    content:
+        "›";
+
+    margin-left:
+        auto;
+
+    font-size:
+        18px;
+
+    color:
+        #777;
+
+    transition:
+        transform .18s ease;
+}
+
+.settings-section[open]
+summary::after {
+
+    transform:
+        rotate(90deg);
+}
+
+.section-icon {
+
+    width:
+        28px;
+
+    height:
+        28px;
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    justify-content:
+        center;
+
+    border-radius:
+        8px;
+
+    background:
+        rgba(255,255,255,.07);
+
+    font-size:
+        14px;
+}
+
+.section-content {
+
+    padding:
+        0 14px 14px;
+}
+
+
+/* ============================================================
+   SETTINGS FIELDS
    ============================================================ */
 
 .setting {
 
     margin-bottom:
-        16px;
-
+        15px;
 }
 
+.setting:last-child {
+
+    margin-bottom:
+        0;
+}
 
 .setting label {
 
@@ -1176,9 +1110,22 @@ body {
 
     font-size:
         12px;
-
 }
 
+.setting-description {
+
+    margin:
+        -3px 0 8px;
+
+    color:
+        #666;
+
+    font-size:
+        10px;
+
+    line-height:
+        1.4;
+}
 
 .setting input,
 .setting select {
@@ -1203,18 +1150,19 @@ body {
 
     outline:
         none;
-
 }
-
 
 .setting input:focus,
 .setting select:focus {
 
     border-color:
         var(--accent);
-
 }
 
+
+/* ============================================================
+   RANGE
+   ============================================================ */
 
 .range-row {
 
@@ -1226,17 +1174,13 @@ body {
 
     gap:
         10px;
-
 }
-
 
 .range-row input {
 
     flex:
         1;
-
 }
-
 
 .range-value {
 
@@ -1251,12 +1195,11 @@ body {
 
     font-size:
         11px;
-
 }
 
 
 /* ============================================================
-   COLOR PICKERS
+   COLOR PICKER
    ============================================================ */
 
 .color-row {
@@ -1266,17 +1209,13 @@ body {
 
     gap:
         8px;
-
 }
-
 
 .color-row input[type="text"] {
 
     flex:
         1;
-
 }
-
 
 .color-row input[type="color"] {
 
@@ -1288,9 +1227,210 @@ body {
 
     cursor:
         pointer;
-
 }
 
+
+/* ============================================================
+   ORB COLOR LIST
+   ============================================================ */
+
+.orb-colors {
+
+    display:
+        flex;
+
+    flex-direction:
+        column;
+
+    gap:
+        8px;
+}
+
+.orb-color {
+
+    display:
+        grid;
+
+    grid-template-columns:
+        34px 1fr 42px;
+
+    gap:
+        8px;
+
+    align-items:
+        center;
+
+    padding:
+        7px;
+
+    border:
+        1px solid rgba(255,255,255,.07);
+
+    border-radius:
+        11px;
+
+    background:
+        rgba(255,255,255,.025);
+}
+
+.orb-color-number {
+
+    width:
+        28px;
+
+    height:
+        28px;
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    justify-content:
+        center;
+
+    border-radius:
+        8px;
+
+    background:
+        rgba(255,255,255,.07);
+
+    color:
+        #999;
+
+    font-size:
+        11px;
+
+    font-weight:
+        600;
+}
+
+.orb-color input[type="text"] {
+
+    width:
+        100%;
+
+    padding:
+        8px;
+
+    border:
+        1px solid #414146;
+
+    border-radius:
+        8px;
+
+    background:
+        #121214;
+
+    color:
+        white;
+
+    outline:
+        none;
+
+    font-family:
+        monospace;
+
+    font-size:
+        12px;
+}
+
+.orb-color input[type="text"]:focus {
+
+    border-color:
+        var(--accent);
+}
+
+.orb-color input[type="color"] {
+
+    width:
+        42px;
+
+    height:
+        34px;
+
+    padding:
+        3px;
+
+    border:
+        1px solid #414146;
+
+    border-radius:
+        8px;
+
+    background:
+        #121214;
+
+    cursor:
+        pointer;
+}
+
+.color-controls {
+
+    display:
+        flex;
+
+    gap:
+        8px;
+
+    margin-top:
+        10px;
+}
+
+.color-controls button {
+
+    flex:
+        1;
+
+    padding:
+        9px;
+
+    border:
+        1px solid #444;
+
+    border-radius:
+        9px;
+
+    background:
+        rgba(255,255,255,.04);
+
+    color:
+        white;
+
+    cursor:
+        pointer;
+}
+
+.color-controls button:hover {
+
+    background:
+        rgba(255,255,255,.08);
+}
+
+.color-controls button:disabled {
+
+    opacity:
+        .35;
+
+    cursor:
+        not-allowed;
+}
+
+.color-count {
+
+    margin-top:
+        8px;
+
+    color:
+        #666;
+
+    font-size:
+        10px;
+
+    text-align:
+        center;
+}
 
 
 /* ============================================================
@@ -1312,9 +1452,7 @@ body {
 
     cursor:
         pointer;
-
 }
-
 
 .primary-button {
 
@@ -1329,9 +1467,7 @@ body {
 
     font-weight:
         650;
-
 }
-
 
 .secondary-button {
 
@@ -1346,9 +1482,13 @@ body {
 
     color:
         white;
-
 }
 
+.secondary-button:hover {
+
+    background:
+        rgba(255,255,255,.06);
+}
 
 .danger-button {
 
@@ -1359,11 +1499,71 @@ body {
         1px solid #633;
 
     background:
-        rgba(120,20,20,.2);
+        rgba(120,20,20,.9);
 
     color:
         #ffaaaa;
+}
 
+
+/* ============================================================
+   BACKGROUND PICKER
+   ============================================================ */
+
+.background-picker {
+
+    display:
+        flex;
+
+    gap:
+        8px;
+}
+
+.background-picker button {
+
+    width:
+        auto;
+
+    flex:
+        1;
+}
+
+.background-file-name {
+
+    margin-top:
+        7px;
+
+    color:
+        #777;
+
+    font-size:
+        11px;
+
+    overflow:
+        hidden;
+
+    text-overflow:
+        ellipsis;
+
+    white-space:
+        nowrap;
+}
+
+
+/* ============================================================
+   SETTINGS FOOTER
+   ============================================================ */
+
+.settings-actions {
+
+    margin-top:
+        12px;
+
+    padding-top:
+        12px;
+
+    border-top:
+        1px solid rgba(255,255,255,.08);
 }
 
 
@@ -1404,30 +1604,31 @@ body {
         20px;
 
     background:
-        rgba(20,20,23,.98);
+        rgba(20,20,23,var(--transparency));
+
+    backdrop-filter:
+        blur(var(--blur));
+
+    -webkit-backdrop-filter:
+        blur(var(--blur));
 
     box-shadow:
         0 30px 80px rgba(0,0,0,.6);
 
     display:
         none;
-
 }
-
 
 .dialog.open {
 
     display:
         block;
-
 }
-
 
 .dialog h2 {
 
     margin-top:
         0;
-
 }
 
 
@@ -1441,41 +1642,31 @@ body {
 
         padding:
             14px;
-
     }
-
 
     .center {
 
         transform:
             translateY(-12px);
-
     }
-
 
     .logo {
 
         margin-bottom:
             22px;
-
     }
-
 
     .search {
 
         height:
             54px;
-
     }
-
 
     .search-key {
 
         display:
             none;
-
     }
-
 
     .shortcuts {
 
@@ -1487,9 +1678,7 @@ body {
 
         overflow-y:
             auto;
-
     }
-
 
     .settings {
 
@@ -1502,60 +1691,15 @@ body {
         max-width:
             calc(100vw - 20px);
 
+        width:
+            390px;
     }
 
-}
+    .orb-color {
 
-
-/* ============================================================
-   BACKGROUND FILE PICKER
-   ============================================================ */
-
-.background-picker {
-
-    display: flex;
-
-    gap: 8px;
-
-}
-
-
-.background-picker button {
-
-    width: auto;
-
-    flex: 1;
-
-}
-
-
-.background-file-name {
-
-    margin-top: 7px;
-
-    color: #777;
-
-    font-size: 11px;
-
-    overflow: hidden;
-
-    text-overflow: ellipsis;
-
-    white-space: nowrap;
-
-}
-
-/* ============================================================
-   SEARCH PATH CLASSES
-   ============================================================ */
-
-.search-sparkle {
-	color: #212121;
-}
-
-
-.search-glass {
-	color: #434343;
+        grid-template-columns:
+            30px 1fr 40px;
+    }
 }
 
 </style>
@@ -1573,7 +1717,6 @@ body {
     class="background-image"
     id="backgroundImage">
 </div>
-
 
 <div
     class="background-overlay">
@@ -1602,7 +1745,6 @@ body {
 
 <div class="page">
 
-
     <div class="topbar">
 
         <button
@@ -1611,7 +1753,6 @@ body {
             title="Add shortcut">
             +
         </button>
-
 
         <button
             class="top-button"
@@ -1625,7 +1766,6 @@ body {
 
     <main class="center">
 
-
         <div
             class="clock"
             id="clock">
@@ -1635,7 +1775,7 @@ body {
         <div
             class="logo"
             id="logo">
-            Oogle
+            Chrome
         </div>
 
 
@@ -1644,7 +1784,37 @@ body {
             id="searchForm">
 
             <div class="search-icon">
-                <svg focusable="false" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" enable-background="new 0 0 24 24" height="24" viewBox="0 0 24 24" width="24"><g><rect fill="none" height="24" width="24"></rect></g><g><g><path d="M17.5 12c0-3.04 2.46-5.5 5.5-5.5-3.04 0-5.5-2.46-5.5-5.5 0 3.04-2.46 5.5-5.5 5.5 3.04 0 5.5 2.46 5.5 5.5z"></path><path d="M15.65 11.58c.18-.5.27-1.03.31-1.58h-2c-.1 1.03-.51 1.93-1.27 2.69-.88.87-1.94 1.31-3.19 1.31C7.03 14 5 12.07 5 9.5 5 7.03 6.93 5 9.5 5c.46 0 .89.08 1.3.2l1.56-1.56C11.5 3.22 10.55 3 9.5 3 5.85 3 3 5.85 3 9.5S5.85 16 9.5 16c.56 0 2.26-.06 3.8-1.3l6.3 6.3 1.4-1.4-6.3-6.3c.4-.5.72-1.08.95-1.72z"></path></g></g></svg>
+
+                <svg
+                    focusable="false"
+                    aria-hidden="true"
+                    xmlns="http://www.w3.org/2000/svg"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    width="24">
+
+                    <g>
+                        <rect
+                            fill="none"
+                            height="24"
+                            width="24">
+                        </rect>
+                    </g>
+
+                    <g>
+
+                        <path
+                            d="M17.5 12c0-3.04 2.46-5.5 5.5-5.5-3.04 0-5.5-2.46-5.5-5.5 0 3.04-2.46 5.5-5.5 5.5 3.04 0 5.5 2.46 5.5 5.5z">
+                        </path>
+
+                        <path
+                            d="M15.65 11.58c.18-.5.27-1.03.31-1.58h-2c-.1 1.03-.51 1.93-1.27 2.69-.88.87-1.94 1.31-3.19 1.31C7.03 14 5 12.07 5 9.5 5 7.03 6.93 5 9.5 5c.46 0 .89.08 1.3.2l1.56-1.56C11.5 3.22 10.55 3 9.5 3 5.85 3 3 5.85 3 9.5S5.85 16 9.5 16c.56 0 2.26-.06 3.8-1.3l6.3 6.3 1.4-1.4-6.3-6.3c.4-.5.72-1.08.95-1.72z">
+                        </path>
+
+                    </g>
+
+                </svg>
+
             </div>
 
 
@@ -1667,14 +1837,12 @@ body {
             id="shortcuts">
         </div>
 
-
     </main>
 
 
     <div class="footer">
         New Tab
     </div>
-
 
 </div>
 
@@ -1690,9 +1858,17 @@ body {
 
     <div class="settings-header">
 
-        <h2>
-            Customize
-        </h2>
+        <div>
+
+            <h2>
+                Customize
+            </h2>
+
+            <div class="settings-subtitle">
+                Personalize your new tab
+            </div>
+
+        </div>
 
 
         <button
@@ -1704,417 +1880,595 @@ body {
     </div>
 
 
-    <!-- ORB PREVIEW -->
+    <!-- ========================================================
+         GENERAL
+         ======================================================== -->
 
-    <div class="orb-preview"></div>
+    <details
+        class="settings-section"
+        open>
 
+        <summary>
 
-    <!-- LOGO -->
+            <span class="section-icon">
+                ✦
+            </span>
 
-    <div class="setting">
+            General
 
-        <label>
-            Logo
-        </label>
-
-        <input
-            id="logoSetting"
-            type="text">
-
-    </div>
-
-
-    <!-- SEARCH -->
-
-    <div class="setting">
-
-        <label>
-            Search engine URL
-        </label>
-
-        <input
-            id="searchSetting"
-            type="text">
-
-    </div>
+        </summary>
 
 
-    <!-- ACCENT -->
+        <div class="section-content">
 
-    <div class="setting">
+            <div class="setting">
 
-        <label>
-            UI accent color
-        </label>
+                <label>
+                    Logo
+                </label>
 
-        <div class="color-row">
+                <input
+                    id="logoSetting"
+                    type="text"
+                    placeholder="Chrome">
 
-            <input
-                id="accentSetting"
-                type="text">
-
-            <input
-                id="accentPicker"
-                type="color">
-
-        </div>
-
-    </div>
+            </div>
 
 
-    <!-- ORB COLOR 1 -->
+            <div class="setting">
 
-    <div class="setting">
+                <label>
+                    Search engine URL
+                </label>
 
-        <label>
-            Orb color 1
-        </label>
+                <div class="setting-description">
+                    The query will be appended to this URL.
+                </div>
 
-        <div class="color-row">
+                <input
+                    id="searchSetting"
+                    type="text"
+                    placeholder="https://www.google.com/search?q=">
 
-            <input
-                id="orbColor1Setting"
-                type="text">
-
-            <input
-                id="orbColor1Picker"
-                type="color">
-
-        </div>
-
-    </div>
+            </div>
 
 
-    <!-- ORB COLOR 2 -->
+            <div class="setting">
 
-    <div class="setting">
+                <label>
+                    UI accent color
+                </label>
 
-        <label>
-            Orb color 2
-        </label>
+                <div class="color-row">
 
-        <div class="color-row">
+                    <input
+                        id="accentSetting"
+                        type="text"
+                        placeholder="#8ab4f8">
 
-            <input
-                id="orbColor2Setting"
-                type="text">
+                    <input
+                        id="accentPicker"
+                        type="color">
 
-            <input
-                id="orbColor2Picker"
-                type="color">
+                </div>
 
-        </div>
-
-    </div>
-
-
-    <!-- ORB COLOR 3 -->
-
-    <div class="setting">
-
-        <label>
-            Orb color 3
-        </label>
-
-        <div class="color-row">
-
-            <input
-                id="orbColor3Setting"
-                type="text">
-
-            <input
-                id="orbColor3Picker"
-                type="color">
-
-        </div>
-
-    </div>
-
-
-    <!-- ORB SIZE -->
-
-    <div class="setting">
-
-        <label>
-            Orb size
-        </label>
-
-        <div class="range-row">
-
-            <input
-                id="orbSizeSetting"
-                type="range"
-                min="100"
-                max="1200"
-                step="10">
-
-            <div
-                class="range-value"
-                id="orbSizeValue">
             </div>
 
         </div>
 
-    </div>
+    </details>
 
 
-    <!-- ORB OPACITY -->
+    <!-- ========================================================
+         APPEARANCE
+         ======================================================== -->
 
-    <div class="setting">
+    <details
+        class="settings-section">
 
-        <label>
-            Orb opacity
-        </label>
+        <summary>
 
-        <div class="range-row">
+            <span class="section-icon">
+                ◐
+            </span>
 
-            <input
-                id="orbOpacitySetting"
-                type="range"
-                min="0"
-                max="1"
-                step=".01">
+            Appearance
 
-            <div
-                class="range-value"
-                id="orbOpacityValue">
+        </summary>
+
+
+        <div class="section-content">
+
+            <div class="setting">
+
+                <label>
+                    UI transparency
+                </label>
+
+                <div class="range-row">
+
+                    <input
+                        id="transparencySetting"
+                        type="range"
+                        min="0.1"
+                        max="1"
+                        step="0.01">
+
+                    <div
+                        class="range-value"
+                        id="transparencyValue">
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="setting">
+
+                <label>
+                    UI blur
+                </label>
+
+                <div class="setting-description">
+                    Higher values use more GPU resources.
+                </div>
+
+                <div class="range-row">
+
+                    <input
+                        id="blurSetting"
+                        type="range"
+                        min="0"
+                        max="30"
+                        step="1">
+
+                    <div
+                        class="range-value"
+                        id="blurValue">
+                    </div>
+
+                </div>
+
             </div>
 
         </div>
 
-    </div>
+    </details>
 
 
-    <!-- ORB SOFTNESS -->
+    <!-- ========================================================
+         ORB
+         ======================================================== -->
 
-    <div class="setting">
+    <details
+        class="settings-section"
+        open>
 
-        <label>
-            Orb softness
-        </label>
+        <summary>
 
-        <div class="range-row">
+            <span class="section-icon">
+                ✺
+            </span>
 
-            <input
-                id="orbSoftnessSetting"
-                type="range"
-                min="15"
-                max="90"
-                step="1">
+            Orb
 
-            <div
-                class="range-value"
-                id="orbSoftnessValue">
+        </summary>
+
+
+        <div class="section-content">
+
+
+            <div class="orb-preview"></div>
+
+
+            <!-- ORB COLORS -->
+
+            <div class="setting">
+
+                <label>
+                    Orb colors
+                </label>
+
+                <div class="setting-description">
+                    Add or remove colors to change the orb's appearance.
+                </div>
+
+
+                <div
+                    class="orb-colors"
+                    id="orbColors">
+                </div>
+
+
+                <div class="color-controls">
+
+                    <button
+                        type="button"
+                        id="addOrbColor">
+                        + Add color
+                    </button>
+
+                    <button
+                        type="button"
+                        id="removeOrbColor">
+                        − Remove
+                    </button>
+
+                </div>
+
+
+                <div
+                    class="color-count"
+                    id="colorCount">
+                </div>
+
+            </div>
+
+
+            <!-- ORB SIZE -->
+
+            <div class="setting">
+
+                <label>
+                    Orb size
+                </label>
+
+                <div class="range-row">
+
+                    <input
+                        id="orbSizeSetting"
+                        type="range"
+                        min="100"
+                        max="1200"
+                        step="10">
+
+                    <div
+                        class="range-value"
+                        id="orbSizeValue">
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- ORB OPACITY -->
+
+            <div class="setting">
+
+                <label>
+                    Orb opacity
+                </label>
+
+                <div class="range-row">
+
+                    <input
+                        id="orbOpacitySetting"
+                        type="range"
+                        min="0"
+                        max="1"
+                        step=".01">
+
+                    <div
+                        class="range-value"
+                        id="orbOpacityValue">
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- ORB SOFTNESS -->
+
+            <div class="setting">
+
+                <label>
+                    Orb softness
+                </label>
+
+                <div class="range-row">
+
+                    <input
+                        id="orbSoftnessSetting"
+                        type="range"
+                        min="15"
+                        max="90"
+                        step="1">
+
+                    <div
+                        class="range-value"
+                        id="orbSoftnessValue">
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- ORB GLOW -->
+
+            <div class="setting">
+
+                <label>
+                    Inner glow
+                </label>
+
+                <div class="range-row">
+
+                    <input
+                        id="orbGlowSetting"
+                        type="range"
+                        min="0"
+                        max="2"
+                        step=".01">
+
+                    <div
+                        class="range-value"
+                        id="orbGlowValue">
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- ORB X -->
+
+            <div class="setting">
+
+                <label>
+                    Horizontal position
+                </label>
+
+                <div class="range-row">
+
+                    <input
+                        id="orbXSetting"
+                        type="range"
+                        min="0"
+                        max="100">
+
+                    <div
+                        class="range-value"
+                        id="orbXValue">
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- ORB Y -->
+
+            <div class="setting">
+
+                <label>
+                    Vertical position
+                </label>
+
+                <div class="range-row">
+
+                    <input
+                        id="orbYSetting"
+                        type="range"
+                        min="0"
+                        max="100">
+
+                    <div
+                        class="range-value"
+                        id="orbYValue">
+                    </div>
+
+                </div>
+
             </div>
 
         </div>
 
-    </div>
+    </details>
 
 
-    <!-- ORB GLOW -->
+    <!-- ========================================================
+         BACKGROUND
+         ======================================================== -->
 
-    <div class="setting">
+    <details
+        class="settings-section">
 
-        <label>
-            Inner glow
-        </label>
+        <summary>
 
-        <div class="range-row">
+            <span class="section-icon">
+                ▧
+            </span>
 
-            <input
-                id="orbGlowSetting"
-                type="range"
-                min="0"
-                max="2"
-                step=".01">
+            Background
 
-            <div
-                class="range-value"
-                id="orbGlowValue">
+        </summary>
+
+
+        <div class="section-content">
+
+
+            <div class="setting">
+
+                <label>
+                    Background image
+                </label>
+
+
+                <div class="background-picker">
+
+                    <button
+                        type="button"
+                        class="secondary-button"
+                        id="browseBackground">
+                        Browse...
+                    </button>
+
+                    <button
+                        type="button"
+                        class="secondary-button"
+                        id="removeBackground">
+                        Remove
+                    </button>
+
+                </div>
+
+
+                <input
+                    id="backgroundFile"
+                    type="file"
+                    accept="image/*"
+                    hidden>
+
+
+                <div
+                    id="backgroundFileName"
+                    class="background-file-name">
+                    No image selected
+                </div>
+
+            </div>
+
+
+            <div class="setting">
+
+                <label>
+                    Background blur
+                </label>
+
+                <div class="range-row">
+
+                    <input
+                        id="backgroundBlurSetting"
+                        type="range"
+                        min="0"
+                        max="20">
+
+                    <div
+                        class="range-value"
+                        id="backgroundBlurValue">
+                    </div>
+
+                </div>
+
             </div>
 
         </div>
 
-    </div>
+    </details>
 
 
-    <!-- ORB X -->
+    <!-- ========================================================
+         CLOCK
+         ======================================================== -->
 
-    <div class="setting">
+    <details
+        class="settings-section">
 
-        <label>
-            Orb horizontal position
-        </label>
+        <summary>
 
-        <div class="range-row">
+            <span class="section-icon">
+                ◷
+            </span>
 
-            <input
-                id="orbXSetting"
-                type="range"
-                min="0"
-                max="100">
+            Clock
 
-            <div
-                class="range-value"
-                id="orbXValue">
+        </summary>
+
+
+        <div class="section-content">
+
+
+            <div class="setting">
+
+                <label>
+                    Clock format
+                </label>
+
+                <select id="clockSetting">
+
+                    <option value="12">
+                        12 hour
+                    </option>
+
+                    <option value="24">
+                        24 hour
+                    </option>
+
+                </select>
+
+            </div>
+
+
+            <div class="setting">
+
+                <label>
+                    Show seconds
+                </label>
+
+                <select id="secondsSetting">
+
+                    <option value="yes">
+                        Yes
+                    </option>
+
+                    <option value="no">
+                        No
+                    </option>
+
+                </select>
+
+            </div>
+
+
+            <div class="setting">
+
+                <label>
+                    Show milliseconds
+                </label>
+
+                <select id="msSetting">
+
+                    <option value="yes">
+                        Yes
+                    </option>
+
+                    <option value="no">
+                        No
+                    </option>
+
+                </select>
+
             </div>
 
         </div>
 
-    </div>
+    </details>
 
 
-    <!-- ORB Y -->
+    <!-- ========================================================
+         ACTIONS
+         ======================================================== -->
 
-    <div class="setting">
+    <div class="settings-actions">
 
-        <label>
-            Orb vertical position
-        </label>
+        <button
+            class="primary-button"
+            id="saveSettings">
+            Save changes
+        </button>
 
-        <div class="range-row">
 
-            <input
-                id="orbYSetting"
-                type="range"
-                min="0"
-                max="100">
-
-            <div
-                class="range-value"
-                id="orbYValue">
-            </div>
-
-        </div>
+        <button
+            class="secondary-button"
+            id="resetSettings">
+            Reset settings
+        </button>
 
     </div>
-
-
-<!-- BACKGROUND IMAGE -->
-
-    <div class="setting">
-
-	    <label>
-	        Background image
-	    </label>
-	
-	    <div class="background-picker">
-	
-	        <button
-	            type="button"
-	            class="secondary-button"
-	            id="browseBackground">
-	            Browse...
-	        </button>
-	
-	        <button
-	            type="button"
-	            class="secondary-button"
-	            id="removeBackground">
-	            Remove
-	        </button>
-	
-	    </div>
-	
-	    <!-- Hidden file picker -->
-	    <input
-	        id="backgroundFile"
-	        type="file"
-	        accept="image/*"
-	        hidden>
-	
-	    <div
-	        id="backgroundFileName"
-	        class="background-file-name">
-	        No image selected
-	    </div>
-	
-    </div>
-	
-	
-    <!-- BACKGROUND BLUR -->
-
-    <div class="setting">
-
-        <label>
-            Background blur
-        </label>
-
-        <div class="range-row">
-
-            <input
-                id="backgroundBlurSetting"
-                type="range"
-                min="0"
-                max="20">
-
-            <div
-                class="range-value"
-                id="backgroundBlurValue">
-            </div>
-
-        </div>
-
-    </div>
-
-
-    <!-- CLOCK -->
-
-    <div class="setting">
-
-        <label>
-            Clock format
-        </label>
-
-        <select id="clockSetting">
-            <option value="12">12 hour</option>
-            <option value="24">24 hour</option>
-        </select>
-
-    </div>
-
-
-    <div class="setting">
-
-        <label>
-            Show seconds
-        </label>
-
-        <select id="secondsSetting">
-            <option value="yes">Yes</option>
-            <option value="no">No</option>
-        </select>
-
-    </div>
-
-
-    <div class="setting">
-
-        <label>
-            Show milliseconds
-        </label>
-
-        <select id="msSetting">
-            <option value="yes">Yes</option>
-            <option value="no">No</option>
-        </select>
-
-    </div>
-
-
-    <button
-        class="primary-button"
-        id="saveSettings">
-        Save changes
-    </button>
-
-
-    <button
-        class="secondary-button"
-        id="resetSettings">
-        Reset settings
-    </button>
 
 
 </div>
@@ -2175,7 +2529,6 @@ body {
         Cancel
     </button>
 
-
 </div>
 
 
@@ -2196,14 +2549,26 @@ const DEFAULT_CONFIG = {
     accent:
         "#8ab4f8",
 
-    orbColor1:
+    transparency:
+        0.5,
+
+    blur:
+        10,
+
+    /*
+     * Orb colors are now an array.
+     *
+     * Minimum: 1
+     * Maximum: 8
+     */
+
+    orbColors: [
+
         "#4285f4",
-
-    orbColor2:
         "#9b72ff",
+        "#00c8ff"
 
-    orbColor3:
-        "#00c8ff",
+    ],
 
     orbSize:
         520,
@@ -2232,9 +2597,11 @@ const DEFAULT_CONFIG = {
     clock:
         "12",
 
-    seconds: true,
+    seconds:
+        true,
 
-    ms: false,
+    ms:
+        false,
 
     shortcuts: [
 
@@ -2292,7 +2659,7 @@ const DEFAULT_CONFIG = {
 
 
 /* ============================================================
-   CONFIG
+   CONFIG HELPERS
    ============================================================ */
 
 function cloneDefault() {
@@ -2315,18 +2682,73 @@ function loadConfig() {
                 "customNewTabConfig"
             );
 
-
         if (!saved) {
 
             return cloneDefault();
 
         }
 
+        const parsed =
+            JSON.parse(saved);
 
-        return {
-            ...cloneDefault(),
-            ...JSON.parse(saved)
+        const defaults =
+            cloneDefault();
+
+        /*
+         * Migrate old versions that used
+         * orbColor1 / orbColor2 / orbColor3.
+         */
+
+        if (
+            !Array.isArray(
+                parsed.orbColors
+            )
+        ) {
+
+            parsed.orbColors = [
+
+                parsed.orbColor1 ||
+                    defaults.orbColors[0],
+
+                parsed.orbColor2 ||
+                    defaults.orbColors[1],
+
+                parsed.orbColor3 ||
+                    defaults.orbColors[2]
+
+            ];
+
+        }
+
+        delete parsed.orbColor1;
+        delete parsed.orbColor2;
+        delete parsed.orbColor3;
+
+        const config = {
+
+            ...defaults,
+            ...parsed
+
         };
+
+        config.orbColors =
+            Array.isArray(config.orbColors)
+                ? config.orbColors
+                    .filter(validHex)
+                    .slice(0, 8)
+                : cloneDefault().orbColors;
+
+        if (
+            config.orbColors.length === 0
+        ) {
+
+            config.orbColors = [
+                defaults.orbColors[0]
+            ];
+
+        }
+
+        return config;
 
     } catch {
 
@@ -2358,41 +2780,188 @@ function saveConfig() {
 const root =
     document.documentElement;
 
-
 const logo =
     document.getElementById("logo");
-
 
 const clock =
     document.getElementById("clock");
 
-
 const searchInput =
     document.getElementById("searchInput");
-
 
 const searchForm =
     document.getElementById("searchForm");
 
-
 const shortcuts =
     document.getElementById("shortcuts");
-
 
 const backgroundImage =
     document.getElementById("backgroundImage");
 
-
 const overlay =
     document.getElementById("overlay");
-
 
 const settingsPanel =
     document.getElementById("settingsPanel");
 
-
 const shortcutDialog =
     document.getElementById("shortcutDialog");
+
+const orb =
+    document.getElementById("orb");
+
+
+/* ============================================================
+   ORB GRADIENT GENERATOR
+   ============================================================ */
+
+function buildOrbGradients(colors) {
+
+    const count =
+        colors.length;
+
+    const positions = [];
+
+    /*
+     * Evenly distribute the colors around
+     * the orb rather than being locked to
+     * exactly three positions.
+     */
+
+    for (
+        let i = 0;
+        i < count;
+        i++
+    ) {
+
+        const angle =
+            (Math.PI * 2 * i) /
+            count;
+
+        const x =
+            Math.round(
+                50 +
+                Math.cos(angle - Math.PI / 2) * 27
+            );
+
+        const y =
+            Math.round(
+                50 +
+                Math.sin(angle - Math.PI / 2) * 27
+            );
+
+        positions.push({
+            x,
+            y
+        });
+
+    }
+
+
+    const gradients =
+        colors.map(
+            (color, index) => {
+
+                const position =
+                    positions[index];
+
+                const strength =
+                    Math.max(
+                        55,
+                        90 -
+                        count * 2
+                    );
+
+                const fade =
+                    Math.min(
+                        65,
+                        48 +
+                        count * 2
+                    );
+
+                return `
+                    radial-gradient(
+                        circle at ${position.x}% ${position.y}%,
+                        color-mix(
+                            in srgb,
+                            ${color} ${strength}%,
+                            transparent
+                        ) 0%,
+                        transparent ${fade}%
+                    )
+                `;
+
+            }
+        );
+
+
+    const ambientStops =
+        colors.map(
+            (color, index) => {
+
+                const percentage =
+                    Math.max(
+                        7,
+                        20 - index * 2
+                    );
+
+                const stop =
+                    Math.min(
+                        65,
+                        8 + index * 7
+                    );
+
+                return `
+                    color-mix(
+                        in srgb,
+                        ${color} ${percentage}%,
+                        transparent
+                    ) ${stop}%
+                `;
+
+            }
+        );
+
+
+    const centerColor =
+        colors[0];
+
+
+    root.style.setProperty(
+        "--orb-background",
+        gradients.join(",")
+    );
+
+
+    root.style.setProperty(
+        "--orb-ambient",
+        `
+            radial-gradient(
+                circle,
+                ${ambientStops.join(",")},
+                transparent 70%
+            )
+        `
+    );
+
+
+    root.style.setProperty(
+        "--orb-center",
+        `
+            radial-gradient(
+                circle,
+                rgba(255,255,255,.38) 0%,
+                color-mix(
+                    in srgb,
+                    ${centerColor} 35%,
+                    transparent
+                ) 18%,
+                transparent 62%
+            )
+        `
+    );
+
+}
 
 
 /* ============================================================
@@ -2406,60 +2975,45 @@ function applyConfig() {
         CONFIG.accent
     );
 
-
     root.style.setProperty(
-        "--orb-color-1",
-        CONFIG.orbColor1
+        "--transparency",
+        CONFIG.transparency
     );
 
-
     root.style.setProperty(
-        "--orb-color-2",
-        CONFIG.orbColor2
+        "--blur",
+        CONFIG.blur + "px"
     );
-
-
-    root.style.setProperty(
-        "--orb-color-3",
-        CONFIG.orbColor3
-    );
-
 
     root.style.setProperty(
         "--orb-size",
         CONFIG.orbSize + "px"
     );
 
-
     root.style.setProperty(
         "--orb-opacity",
         CONFIG.orbOpacity
     );
-
 
     root.style.setProperty(
         "--orb-softness",
         CONFIG.orbSoftness + "%"
     );
 
-
     root.style.setProperty(
         "--orb-glow",
         CONFIG.orbGlow
     );
-
 
     root.style.setProperty(
         "--orb-x",
         CONFIG.orbX + "%"
     );
 
-
     root.style.setProperty(
         "--orb-y",
         CONFIG.orbY + "%"
     );
-
 
     root.style.setProperty(
         "--background-blur",
@@ -2467,11 +3021,18 @@ function applyConfig() {
     );
 
 
+    buildOrbGradients(
+        CONFIG.orbColors
+    );
+
+
     logo.textContent =
         CONFIG.logo;
 
 
-    if (CONFIG.background) {
+    if (
+        CONFIG.background
+    ) {
 
         backgroundImage.style.backgroundImage =
             `url("${CONFIG.background}")`;
@@ -2501,7 +3062,7 @@ function applyConfig() {
 
 
 /* ============================================================
-   BACKGROUND IMAGE FILE PICKER
+   BACKGROUND FILE PICKER
    ============================================================ */
 
 const browseBackground =
@@ -2525,10 +3086,6 @@ const backgroundFileName =
     );
 
 
-/* ============================================================
-   OPEN FILE PICKER
-   ============================================================ */
-
 browseBackground.addEventListener(
     "click",
     () => {
@@ -2539,10 +3096,6 @@ browseBackground.addEventListener(
 );
 
 
-/* ============================================================
-   SELECT IMAGE
-   ============================================================ */
-
 backgroundFile.addEventListener(
     "change",
     event => {
@@ -2550,15 +3103,9 @@ backgroundFile.addEventListener(
         const file =
             event.target.files[0];
 
-
         if (!file) {
             return;
         }
-
-
-        /*
-         * Make sure it really is an image.
-         */
 
         if (
             !file.type.startsWith(
@@ -2575,11 +3122,6 @@ backgroundFile.addEventListener(
         }
 
 
-        /*
-         * FileReader converts the image into a
-         * Data URL that can be stored in localStorage.
-         */
-
         const reader =
             new FileReader();
 
@@ -2591,20 +3133,11 @@ backgroundFile.addEventListener(
                     reader.result;
 
 
-                /*
-                 * Save the actual image.
-                 */
-
                 CONFIG.background =
                     dataURL;
 
-
                 saveConfig();
 
-
-                /*
-                 * Apply immediately.
-                 */
 
                 backgroundImage.style.backgroundImage =
                     `url("${dataURL}")`;
@@ -2618,10 +3151,6 @@ backgroundFile.addEventListener(
                 backgroundImage.style.opacity =
                     "1";
 
-
-                /*
-                 * Show filename.
-                 */
 
                 backgroundFileName.textContent =
                     file.name;
@@ -2647,10 +3176,6 @@ backgroundFile.addEventListener(
 );
 
 
-/* ============================================================
-   REMOVE BACKGROUND
-   ============================================================ */
-
 removeBackground.addEventListener(
     "click",
     () => {
@@ -2671,7 +3196,6 @@ removeBackground.addEventListener(
         backgroundFile.value =
             "";
 
-
         backgroundFileName.textContent =
             "No image selected";
 
@@ -2685,82 +3209,174 @@ removeBackground.addEventListener(
 
 function updateClock() {
 
-    const now = new Date();
+    const now =
+        new Date();
 
-    const showSeconds = CONFIG.seconds === true;
-    const showMilliseconds = CONFIG.ms === true;
+    const showSeconds =
+        CONFIG.seconds === true;
 
-    let time = now.toLocaleTimeString(
-        undefined,
-        {
-            hour: "numeric",
-            minute: "2-digit",
-            second: showSeconds || showMilliseconds ? "2-digit" : undefined,
-            hour12: CONFIG.clock === "12"
-        }
-    );
+    const showMilliseconds =
+        CONFIG.ms === true;
 
-    time = time.trim();
 
-    if (showMilliseconds) {
+    let time =
+        now.toLocaleTimeString(
+            undefined,
+            {
+
+                hour:
+                    "numeric",
+
+                minute:
+                    "2-digit",
+
+                second:
+                    showSeconds ||
+                    showMilliseconds
+                        ? "2-digit"
+                        : undefined,
+
+                hour12:
+                    CONFIG.clock === "12"
+
+            }
+        );
+
+
+    time =
+        time.trim();
+
+
+    if (
+        showMilliseconds
+    ) {
 
         const milliseconds =
-            String(now.getMilliseconds()).padStart(2, "0").trim();
+            String(
+                now.getMilliseconds()
+            )
+                .padStart(3, "0");
 
-        time += "." + milliseconds.toString().slice(milliseconds.length - 2);
+
+        time +=
+            "." +
+            milliseconds;
 
     }
 
-    time = time.replaceAll("AM", "");
-    time = time.replaceAll("PM", "");
 
-    time = time.replaceAll(" ", "");
+    time =
+        time.replaceAll(
+            "AM",
+            ""
+        );
 
-    clock.textContent = time;
+    time =
+        time.replaceAll(
+            "PM",
+            ""
+        );
+
+    time =
+        time.replaceAll(
+            " ",
+            ""
+        );
+
+
+    clock.textContent =
+        time;
 
 }
 
 
-let clockFrame = null;
-let clockTimeout = null;
+let clockFrame =
+    null;
+
+let clockTimeout =
+    null;
+
 
 function startClock() {
 
-    if (clockFrame !== null) {
-        cancelAnimationFrame(clockFrame);
-        clockFrame = null;
+    if (
+        clockFrame !== null
+    ) {
+
+        cancelAnimationFrame(
+            clockFrame
+        );
+
+        clockFrame =
+            null;
+
     }
 
-    if (clockTimeout !== null) {
-        clearTimeout(clockTimeout);
-        clockTimeout = null;
+
+    if (
+        clockTimeout !== null
+    ) {
+
+        clearTimeout(
+            clockTimeout
+        );
+
+        clockTimeout =
+            null;
+
     }
+
 
     updateClock();
 
-    if (CONFIG.ms === true) {
 
-        const loop = () => {
-            updateClock();
-            clockFrame = requestAnimationFrame(loop);
-        };
+    if (
+        CONFIG.ms === true
+    ) {
 
-        clockFrame = requestAnimationFrame(loop);
+        const loop =
+            () => {
+
+                updateClock();
+
+                clockFrame =
+                    requestAnimationFrame(
+                        loop
+                    );
+
+            };
+
+
+        clockFrame =
+            requestAnimationFrame(
+                loop
+            );
 
     } else {
 
-        const loop = () => {
-            updateClock();
-            clockTimeout = setTimeout(
-                loop,
-                CONFIG.seconds === true ? 250 : 1000
-            );
-        };
+        const loop =
+            () => {
 
-        clockTimeout = setTimeout(
-            loop,
-            CONFIG.seconds === true ? 250 : 1000
-        );
+                updateClock();
+
+                clockTimeout =
+                    setTimeout(
+                        loop,
+                        CONFIG.seconds
+                            ? 250
+                            : 1000
+                    );
+
+            };
+
+
+        clockTimeout =
+            setTimeout(
+                loop,
+                CONFIG.seconds
+                    ? 250
+                    : 1000
+            );
 
     }
 
@@ -2771,24 +3387,12 @@ function startClock() {
    FAVICON
    ============================================================ */
 
-/*
-   Google's favicon service is used here because many websites
-   don't expose a convenient favicon URL.
-
-   Example:
-
-   https://www.google.com/s2/favicons?domain=github.com&sz=64
-
-   If it fails, the shortcut falls back to the first letter.
-*/
-
 function faviconURL(url) {
 
     try {
 
         const parsed =
             new URL(url);
-
 
         return (
             "https://www.google.com/s2/favicons" +
@@ -2830,10 +3434,8 @@ function renderShortcuts() {
             card.className =
                 "shortcut";
 
-
             card.draggable =
                 true;
-
 
             card.dataset.index =
                 index;
@@ -2845,11 +3447,15 @@ function renderShortcuts() {
                 );
 
 
+            prerenderURL(
+                shortcut.url
+            );
+
+
             const icon =
                 document.createElement(
                     "div"
                 );
-
 
             icon.className =
                 "shortcut-icon";
@@ -2862,18 +3468,14 @@ function renderShortcuts() {
                         "img"
                     );
 
-
                 image.src =
                     iconURL;
-
 
                 image.alt =
                     "";
 
-
                 image.loading =
                     "lazy";
-
 
                 image.decoding =
                     "async";
@@ -2883,7 +3485,6 @@ function renderShortcuts() {
                     () => {
 
                         image.remove();
-
 
                         icon.innerHTML =
                             `<span class="shortcut-fallback">
@@ -2920,10 +3521,8 @@ function renderShortcuts() {
                     "div"
                 );
 
-
             name.className =
                 "shortcut-name";
-
 
             name.textContent =
                 shortcut.name;
@@ -2934,10 +3533,8 @@ function renderShortcuts() {
                     "div"
                 );
 
-
             url.className =
                 "shortcut-url";
-
 
             url.textContent =
                 getHostname(
@@ -2950,14 +3547,11 @@ function renderShortcuts() {
                     "button"
                 );
 
-
             menu.className =
                 "shortcut-menu";
 
-
             menu.textContent =
                 "×";
-
 
             menu.title =
                 "Remove shortcut";
@@ -2967,23 +3561,18 @@ function renderShortcuts() {
                 icon
             );
 
-
             card.appendChild(
                 name
             );
-
 
             card.appendChild(
                 url
             );
 
-
             card.appendChild(
                 menu
             );
 
-
-            /* Open */
 
             card.addEventListener(
                 "click",
@@ -2997,15 +3586,12 @@ function renderShortcuts() {
 
                     }
 
-
                     window.location.href =
                         shortcut.url;
 
                 }
             );
 
-
-            /* Delete */
 
             menu.addEventListener(
                 "click",
@@ -3028,8 +3614,6 @@ function renderShortcuts() {
             );
 
 
-            /* Drag */
-
             card.addEventListener(
                 "dragstart",
                 () => {
@@ -3049,7 +3633,6 @@ function renderShortcuts() {
                     card.classList.remove(
                         "dragging"
                     );
-
 
                     rebuildShortcutOrder();
 
@@ -3178,11 +3761,30 @@ function escapeHTML(value) {
 
     return String(value)
 
-        .replaceAll("&","&amp;")
-        .replaceAll("<","&lt;")
-        .replaceAll(">","&gt;")
-        .replaceAll('"',"&quot;")
-        .replaceAll("'","&#039;");
+        .replaceAll(
+            "&",
+            "&amp;"
+        )
+
+        .replaceAll(
+            "<",
+            "&lt;"
+        )
+
+        .replaceAll(
+            ">",
+            "&gt;"
+        )
+
+        .replaceAll(
+            '"',
+            "&quot;"
+        )
+
+        .replaceAll(
+            "'",
+            "&#039;"
+        );
 
 }
 
@@ -3190,106 +3792,192 @@ function escapeHTML(value) {
 function validHex(value) {
 
     return /^#[0-9a-fA-F]{6}$/
-        .test(value);
+        .test(
+            value
+        );
 
 }
+
 
 function looksLikeURL(input) {
-    input = input.trim();
+
+    input =
+        input.trim();
+
 
     if (!input) {
+
         return false;
+
     }
 
-    // Explicit protocol
-    if (/^[a-z][a-z0-9+.-]*:\/\//i.test(input)) {
-        return true;
-    }
 
-    // localhost
     if (
-        /^localhost(?::\d+)?(?:\/.*)?$/i.test(input)
+        /^[a-z][a-z0-9+.-]*:\/\//i
+            .test(input)
     ) {
+
         return true;
+
     }
 
-    // IPv4 address
+
     if (
-        /^(?:\d{1,3}\.){3}\d{1,3}(?::\d+)?(?:\/.*)?$/.test(input)
+        /^localhost(?::\d+)?(?:\/.*)?$/i
+            .test(input)
     ) {
+
         return true;
+
     }
 
-    // Domain-like input
+
     if (
-        /^[^\s/]+\.[^\s/]+(?:\/.*)?$/.test(input)
+        /^(?:\d{1,3}\.){3}\d{1,3}(?::\d+)?(?:\/.*)?$/
+            .test(input)
     ) {
+
         return true;
+
     }
+
+
+    if (
+        /^[^\s/]+\.[^\s/]+(?:\/.*)?$/
+            .test(input)
+    ) {
+
+        return true;
+
+    }
+
 
     return false;
+
 }
+
 
 function normalizeURL(input) {
-    input = input.trim();
+
+    input =
+        input.trim();
+
 
     if (
-        !/^[a-z][a-z0-9+.-]*:\/\//i.test(input)
+        !/^[a-z][a-z0-9+.-]*:\/\//i
+            .test(input)
     ) {
-        input = "https://" + input;
+
+        input =
+            "https://" + input;
+
     }
 
+
     try {
+
         return new URL(input).href;
+
     } catch {
+
         return null;
+
     }
+
 }
+
 
 function resolveOmniboxInput(input) {
 
-    input = input.trim();
+    input =
+        input.trim();
+
 
     if (!input) {
+
         return null;
+
     }
 
-    // Explicit URL
+
     if (
-        /^[a-z][a-z0-9+.-]*:\/\//i.test(input)
+        /^[a-z][a-z0-9+.-]*:\/\//i
+            .test(input)
     ) {
-        const url = normalizeURL(input);
+
+        const url =
+            normalizeURL(
+                input
+            );
+
 
         if (url) {
+
             return {
-                type: "url",
+
+                type:
+                    "url",
+
                 url
+
             };
+
         }
+
     }
 
-    // localhost / IP / domain
-    if (looksLikeURL(input)) {
-        const url = normalizeURL(input);
+
+    if (
+        looksLikeURL(
+            input
+        )
+    ) {
+
+        const url =
+            normalizeURL(
+                input
+            );
+
 
         if (url) {
+
             return {
-                type: "url",
+
+                type:
+                    "url",
+
                 url
+
             };
+
         }
+
     }
 
-    // Otherwise search
+
     return {
-        type: "search",
+
+        type:
+            "search",
+
         url:
             CONFIG.searchEngine +
-            encodeURIComponent(input)
+            encodeURIComponent(
+                input
+            )
+
     };
+
 }
 
-let currentSpeculationURL = null;
+
+/* ============================================================
+   SPECULATION / PRERENDER
+   ============================================================ */
+
+let currentSpeculationURL =
+    null;
+
 
 function prerenderURL(url) {
 
@@ -3297,40 +3985,67 @@ function prerenderURL(url) {
         return;
     }
 
+
     if (
         !HTMLScriptElement.supports ||
         !HTMLScriptElement.supports(
             "speculationrules"
         )
     ) {
+
         return;
+
     }
+
 
     if (
-        currentSpeculationURL === url
+        currentSpeculationURL ===
+        url
     ) {
+
         return;
+
     }
 
-    currentSpeculationURL = url;
+
+    currentSpeculationURL =
+        url;
+
 
     const script =
-        document.createElement("script");
+        document.createElement(
+            "script"
+        );
+
 
     script.type =
         "speculationrules";
 
+
     script.textContent =
         JSON.stringify({
+
             prerender: [
+
                 {
-                    urls: [url],
-                    eagerness: "moderate"
+
+                    urls:
+                        [url],
+
+                    eagerness:
+                        "moderate"
+
                 }
+
             ]
+
         });
 
-    document.head.appendChild(script);
+
+    document.head.appendChild(
+        script
+    );
+
 }
 
 
@@ -3338,44 +4053,64 @@ function prerenderURL(url) {
    SEARCH
    ============================================================ */
 
-let typingTimer = null;
+let typingTimer =
+    null;
+
 
 searchInput.addEventListener(
     "input",
     () => {
 
-        clearTimeout(typingTimer);
+        clearTimeout(
+            typingTimer
+        );
+
 
         const input =
             searchInput.value.trim();
 
+
         if (!input) {
-            currentSpeculationURL = null;
+
+            currentSpeculationURL =
+                null;
+
             return;
+
         }
 
-        typingTimer = setTimeout(
-            () => {
 
-                const result =
-                    resolveOmniboxInput(input);
+        typingTimer =
+            setTimeout(
+                () => {
 
-                if (
-                    !result ||
-                    result.type !== "url"
-                ) {
-                    return;
-                }
+                    const result =
+                        resolveOmniboxInput(
+                            input
+                        );
 
-                prerenderURL(
-                    result.url
-                );
 
-            },
-            250
-        );
+                    if (
+                        !result ||
+                        result.type !== "url"
+                    ) {
+
+                        return;
+
+                    }
+
+
+                    prerenderURL(
+                        result.url
+                    );
+
+                },
+                250
+            );
+
     }
 );
+
 
 searchForm.addEventListener(
     "submit",
@@ -3383,63 +4118,91 @@ searchForm.addEventListener(
 
         event.preventDefault();
 
+
         const input =
             searchInput.value.trim();
+
 
         if (!input) {
             return;
         }
 
+
         const result =
-            resolveOmniboxInput(input);
+            resolveOmniboxInput(
+                input
+            );
+
 
         if (!result) {
             return;
         }
 
+
         window.location.href =
             result.url;
+
     }
 );
+
 
 searchInput.addEventListener(
     "keydown",
     event => {
 
-        if (event.key === "Escape") {
-            searchInput.value = "";
+        if (
+            event.key ===
+            "Escape"
+        ) {
+
+            searchInput.value =
+                "";
+
             searchInput.blur();
 
-            currentSpeculationURL = null;
+            currentSpeculationURL =
+                null;
 
             return;
+
         }
+
 
         if (
             event.key === "Enter" &&
             event.shiftKey
         ) {
+
             event.preventDefault();
+
 
             const input =
                 searchInput.value.trim();
+
 
             if (!input) {
                 return;
             }
 
+
             const result =
-                resolveOmniboxInput(input);
+                resolveOmniboxInput(
+                    input
+                );
+
 
             if (!result) {
                 return;
             }
 
+
             window.open(
                 result.url,
                 "_blank"
             );
+
         }
+
     }
 );
 
@@ -3453,150 +4216,130 @@ const logoSetting =
         "logoSetting"
     );
 
-
 const searchSetting =
     document.getElementById(
         "searchSetting"
     );
-
 
 const accentSetting =
     document.getElementById(
         "accentSetting"
     );
 
-
 const accentPicker =
     document.getElementById(
         "accentPicker"
     );
 
-
-const orbColor1Setting =
+const transparencySetting =
     document.getElementById(
-        "orbColor1Setting"
+        "transparencySetting"
     );
 
-
-const orbColor1Picker =
+const transparencyValue =
     document.getElementById(
-        "orbColor1Picker"
+        "transparencyValue"
     );
 
-
-const orbColor2Setting =
+const blurSetting =
     document.getElementById(
-        "orbColor2Setting"
+        "blurSetting"
     );
 
-
-const orbColor2Picker =
+const blurValue =
     document.getElementById(
-        "orbColor2Picker"
+        "blurValue"
     );
 
-
-const orbColor3Setting =
+const orbColors =
     document.getElementById(
-        "orbColor3Setting"
+        "orbColors"
     );
 
-
-const orbColor3Picker =
+const addOrbColor =
     document.getElementById(
-        "orbColor3Picker"
+        "addOrbColor"
     );
 
+const removeOrbColor =
+    document.getElementById(
+        "removeOrbColor"
+    );
+
+const colorCount =
+    document.getElementById(
+        "colorCount"
+    );
 
 const orbSizeSetting =
     document.getElementById(
         "orbSizeSetting"
     );
 
-
 const orbSizeValue =
     document.getElementById(
         "orbSizeValue"
     );
-
 
 const orbOpacitySetting =
     document.getElementById(
         "orbOpacitySetting"
     );
 
-
 const orbOpacityValue =
     document.getElementById(
         "orbOpacityValue"
     );
-
 
 const orbSoftnessSetting =
     document.getElementById(
         "orbSoftnessSetting"
     );
 
-
 const orbSoftnessValue =
     document.getElementById(
         "orbSoftnessValue"
     );
-
 
 const orbGlowSetting =
     document.getElementById(
         "orbGlowSetting"
     );
 
-
 const orbGlowValue =
     document.getElementById(
         "orbGlowValue"
     );
-
 
 const orbXSetting =
     document.getElementById(
         "orbXSetting"
     );
 
-
 const orbXValue =
     document.getElementById(
         "orbXValue"
     );
-
 
 const orbYSetting =
     document.getElementById(
         "orbYSetting"
     );
 
-
 const orbYValue =
     document.getElementById(
         "orbYValue"
     );
-
-
-const backgroundSetting =
-    document.getElementById(
-        "backgroundSetting"
-    );
-
 
 const backgroundBlurSetting =
     document.getElementById(
         "backgroundBlurSetting"
     );
 
-
 const backgroundBlurValue =
     document.getElementById(
         "backgroundBlurValue"
     );
-
 
 const clockSetting =
     document.getElementById(
@@ -3675,30 +4418,282 @@ bindColor(
 );
 
 
-bindColor(
-    orbColor1Setting,
-    orbColor1Picker,
-    "--orb-color-1"
+/* ============================================================
+   ORB COLOR EDITOR
+   ============================================================ */
+
+function renderOrbColorEditor() {
+
+    orbColors.innerHTML =
+        "";
+
+
+    CONFIG.orbColors.forEach(
+        (color, index) => {
+
+            const row =
+                document.createElement(
+                    "div"
+                );
+
+            row.className =
+                "orb-color";
+
+
+            const number =
+                document.createElement(
+                    "div"
+                );
+
+            number.className =
+                "orb-color-number";
+
+            number.textContent =
+                index + 1;
+
+
+            const text =
+                document.createElement(
+                    "input"
+                );
+
+            text.type =
+                "text";
+
+            text.value =
+                color;
+
+            text.maxLength =
+                7;
+
+            text.spellcheck =
+                false;
+
+            text.setAttribute(
+                "aria-label",
+                `Orb color ${index + 1}`
+            );
+
+
+            const picker =
+                document.createElement(
+                    "input"
+                );
+
+            picker.type =
+                "color";
+
+            picker.value =
+                validHex(color)
+                    ? color
+                    : "#ffffff";
+
+
+            picker.addEventListener(
+                "input",
+                () => {
+
+                    CONFIG.orbColors[index] =
+                        picker.value;
+
+                    text.value =
+                        picker.value;
+
+                    buildOrbGradients(
+                        CONFIG.orbColors
+                    );
+
+                }
+            );
+
+
+            text.addEventListener(
+                "input",
+                () => {
+
+                    if (
+                        validHex(
+                            text.value
+                        )
+                    ) {
+
+                        CONFIG.orbColors[index] =
+                            text.value;
+
+                        picker.value =
+                            text.value;
+
+                        buildOrbGradients(
+                            CONFIG.orbColors
+                        );
+
+                    }
+
+                }
+            );
+
+
+            row.appendChild(
+                number
+            );
+
+            row.appendChild(
+                text
+            );
+
+            row.appendChild(
+                picker
+            );
+
+
+            orbColors.appendChild(
+                row
+            );
+
+        }
+    );
+
+
+    colorCount.textContent =
+        `${CONFIG.orbColors.length} of 8 colors`;
+
+
+    addOrbColor.disabled =
+        CONFIG.orbColors.length >= 8;
+
+
+    removeOrbColor.disabled =
+        CONFIG.orbColors.length <= 1;
+
+}
+
+
+addOrbColor.addEventListener(
+    "click",
+    () => {
+
+        if (
+            CONFIG.orbColors.length >= 8
+        ) {
+
+            return;
+
+        }
+
+
+        const palette = [
+
+            "#ff3b30",
+            "#ff9500",
+            "#ffcc00",
+            "#34c759",
+            "#00c7be",
+            "#5856d6",
+            "#af52de",
+            "#ff2d55"
+
+        ];
+
+
+        const newColor =
+            palette[
+                CONFIG.orbColors.length %
+                palette.length
+            ];
+
+
+        CONFIG.orbColors.push(
+            newColor
+        );
+
+
+        renderOrbColorEditor();
+
+        buildOrbGradients(
+            CONFIG.orbColors
+        );
+
+    }
 );
 
 
-bindColor(
-    orbColor2Setting,
-    orbColor2Picker,
-    "--orb-color-2"
-);
+removeOrbColor.addEventListener(
+    "click",
+    () => {
+
+        if (
+            CONFIG.orbColors.length <= 1
+        ) {
+
+            return;
+
+        }
 
 
-bindColor(
-    orbColor3Setting,
-    orbColor3Picker,
-    "--orb-color-3"
+        CONFIG.orbColors.pop();
+
+
+        renderOrbColorEditor();
+
+        buildOrbGradients(
+            CONFIG.orbColors
+        );
+
+    }
 );
 
 
 /* ============================================================
    RANGE BINDINGS
    ============================================================ */
+
+transparencySetting.addEventListener(
+    "input",
+    () => {
+
+        const value =
+            Number(
+                transparencySetting.value
+            );
+
+
+        transparencyValue.textContent =
+            Math.round(
+                value * 100
+            ) + "%";
+
+
+        root.style.setProperty(
+            "--transparency",
+            value
+        );
+
+    }
+);
+
+
+blurSetting.addEventListener(
+    "input",
+    () => {
+
+        const value =
+            Number(
+                blurSetting.value
+            );
+
+
+        blurValue.textContent =
+            value + "px";
+
+
+        root.style.setProperty(
+            "--blur",
+            value + "px"
+        );
+
+    }
+);
+
 
 orbSizeSetting.addEventListener(
     "input",
@@ -3883,33 +4878,29 @@ function openSettings() {
         CONFIG.accent;
 
 
-    orbColor1Setting.value =
-        CONFIG.orbColor1;
+    transparencySetting.value =
+        CONFIG.transparency;
 
 
-    orbColor1Picker.value =
-        CONFIG.orbColor1;
+    transparencyValue.textContent =
+        Math.round(
+            CONFIG.transparency * 100
+        ) + "%";
 
 
-    orbColor2Setting.value =
-        CONFIG.orbColor2;
+    blurSetting.value =
+        CONFIG.blur;
 
 
-    orbColor2Picker.value =
-        CONFIG.orbColor2;
+    blurValue.textContent =
+        CONFIG.blur + "px";
 
 
-    orbColor3Setting.value =
-        CONFIG.orbColor3;
-
-
-    orbColor3Picker.value =
-        CONFIG.orbColor3;
+    renderOrbColorEditor();
 
 
     orbSizeSetting.value =
         CONFIG.orbSize;
-
 
     orbSizeValue.textContent =
         CONFIG.orbSize + "px";
@@ -3917,7 +4908,6 @@ function openSettings() {
 
     orbOpacitySetting.value =
         CONFIG.orbOpacity;
-
 
     orbOpacityValue.textContent =
         Math.round(
@@ -3928,14 +4918,12 @@ function openSettings() {
     orbSoftnessSetting.value =
         CONFIG.orbSoftness;
 
-
     orbSoftnessValue.textContent =
         CONFIG.orbSoftness + "%";
 
 
     orbGlowSetting.value =
         CONFIG.orbGlow;
-
 
     orbGlowValue.textContent =
         CONFIG.orbGlow.toFixed(2);
@@ -3944,7 +4932,6 @@ function openSettings() {
     orbXSetting.value =
         CONFIG.orbX;
 
-
     orbXValue.textContent =
         CONFIG.orbX + "%";
 
@@ -3952,20 +4939,18 @@ function openSettings() {
     orbYSetting.value =
         CONFIG.orbY;
 
-
     orbYValue.textContent =
         CONFIG.orbY + "%";
 
 
     backgroundFileName.textContent =
-    CONFIG.background
-        ? "Saved image"
-        : "No image selected";
+        CONFIG.background
+            ? "Saved image"
+            : "No image selected";
 
 
     backgroundBlurSetting.value =
         CONFIG.backgroundBlur;
-
 
     backgroundBlurValue.textContent =
         CONFIG.backgroundBlur + "px";
@@ -3973,17 +4958,21 @@ function openSettings() {
 
     clockSetting.value =
         CONFIG.clock;
+
     secondsSetting.value =
-        CONFIG.seconds === true ? "yes" : "no";
+        CONFIG.seconds
+            ? "yes"
+            : "no";
 
     msSetting.value =
-        CONFIG.ms === true ? "yes" : "no";
+        CONFIG.ms
+            ? "yes"
+            : "no";
 
 
     settingsPanel.classList.add(
         "open"
     );
-
 
     overlay.classList.add(
         "open"
@@ -4042,12 +5031,14 @@ document.getElementById(
 
         CONFIG.logo =
             logoSetting.value.trim()
-            || "Chrome";
+            ||
+            DEFAULT_CONFIG.logo;
 
 
         CONFIG.searchEngine =
             searchSetting.value.trim()
-            || DEFAULT_CONFIG.searchEngine;
+            ||
+            DEFAULT_CONFIG.searchEngine;
 
 
         CONFIG.accent =
@@ -4058,28 +5049,33 @@ document.getElementById(
                 : DEFAULT_CONFIG.accent;
 
 
-        CONFIG.orbColor1 =
-            validHex(
-                orbColor1Setting.value
-            )
-                ? orbColor1Setting.value
-                : DEFAULT_CONFIG.orbColor1;
+        CONFIG.transparency =
+            Number(
+                transparencySetting.value
+            );
 
 
-        CONFIG.orbColor2 =
-            validHex(
-                orbColor2Setting.value
-            )
-                ? orbColor2Setting.value
-                : DEFAULT_CONFIG.orbColor2;
+        CONFIG.blur =
+            Number(
+                blurSetting.value
+            );
 
 
-        CONFIG.orbColor3 =
-            validHex(
-                orbColor3Setting.value
-            )
-                ? orbColor3Setting.value
-                : DEFAULT_CONFIG.orbColor3;
+        CONFIG.orbColors =
+            CONFIG.orbColors
+                .filter(validHex)
+                .slice(0, 8);
+
+
+        if (
+            CONFIG.orbColors.length === 0
+        ) {
+
+            CONFIG.orbColors = [
+                DEFAULT_CONFIG.orbColors[0]
+            ];
+
+        }
 
 
         CONFIG.orbSize =
@@ -4126,11 +5122,16 @@ document.getElementById(
 
         CONFIG.clock =
             clockSetting.value;
+
+
         CONFIG.seconds =
-            secondsSetting.value === "yes";
+            secondsSetting.value ===
+            "yes";
+
 
         CONFIG.ms =
-            msSetting.value === "yes";
+            msSetting.value ===
+            "yes";
 
 
         saveConfig();
