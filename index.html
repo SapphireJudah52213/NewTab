@@ -3260,7 +3260,7 @@ function updateClock() {
 
         time +=
             "." +
-            milliseconds;
+            milliseconds.toString().slice(0, 2);
 
     }
 
