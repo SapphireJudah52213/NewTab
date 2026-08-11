@@ -28,6 +28,7 @@
     --orb-background: transparent;
     --orb-ambient: transparent;
     --orb-center: transparent;
+    --orb-center-size: 70%;
 
     --background-blur: 0px;
 
@@ -176,7 +177,13 @@ body {
 
     position: absolute;
 
-    inset: 15%;
+    width: var(--orb-center-size);
+    height: var(--orb-center-size);
+
+    left: 50%;
+    top: 50%;
+
+    transform: translate(-50%, -50%);
 
     border-radius: 50%;
 
@@ -2106,6 +2113,107 @@ summary::after {
             </div>
 
 
+            <!-- ORB CENTER COLOR -->
+
+            <div class="setting">
+
+                <label>
+                    Center orb color
+                </label>
+
+                <div class="setting-description">
+                    Customize the light in the center of the orb.
+                </div>
+
+                <div class="color-row">
+
+                    <input
+                        id="orbCenter"
+                        type="text"
+                        maxlength="7"
+                        placeholder="#ffffff"
+                        spellcheck="false">
+
+                    <input
+                        id="orbCenterPicker"
+                        type="color">
+
+                </div>
+
+            </div>
+
+
+            <!-- ORB CENTER LIGHT -->
+
+            <div class="setting">
+
+                <label>
+                    Center orb light
+                </label>
+
+                <div class="setting-description">
+                    Turn the center light on or off.
+                </div>
+
+                <select id="orbCenterEnabled">
+                    <option value="yes">Enabled</option>
+                    <option value="no">Disabled</option>
+                </select>
+
+            </div>
+
+
+            <!-- ORB CENTER SIZE -->
+
+            <div class="setting">
+
+                <label>
+                    Center orb size
+                </label>
+
+                <div class="setting-description">
+                    Adjust the size of the center light inside the orb.
+                </div>
+
+                <div class="range-row">
+
+                    <input
+                        id="orbCenterSizeSetting"
+                        type="range"
+                        min="5"
+                        max="100"
+                        step="1">
+
+                    <div
+                        class="range-value"
+                        id="orbCenterSizeValue">
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- ORB GRADIENT -->
+
+            <div class="setting">
+
+                <label>
+                    Orb gradient
+                </label>
+
+                <div class="setting-description">
+                    Choose whether the orb blends between its colors or uses one solid color.
+                </div>
+
+                <select id="orbGradientSetting">
+                    <option value="yes">Enabled</option>
+                    <option value="no">Disabled</option>
+                </select>
+
+            </div>
+
+
             <!-- ORB SIZE -->
 
             <div class="setting">
@@ -2570,6 +2678,14 @@ const DEFAULT_CONFIG = {
 
     ],
 
+    orbCenter: "#ffffff",
+
+    orbCenterEnabled: true,
+
+    orbCenterSize: 70,
+
+    orbGradient: true,
+
     orbSize:
         520,
 
@@ -2731,6 +2847,43 @@ function loadConfig() {
 
         };
 
+        if (
+            typeof config.orbGradient !== "boolean"
+        ) {
+
+            config.orbGradient =
+                defaults.orbGradient;
+
+        }
+
+        if (!validHex(config.orbCenter)) {
+
+            config.orbCenter =
+                defaults.orbCenter;
+
+        }
+
+        if (typeof config.orbCenterEnabled !== "boolean") {
+
+            config.orbCenterEnabled =
+                defaults.orbCenterEnabled;
+
+        }
+
+        config.orbCenterSize =
+            Number(config.orbCenterSize);
+
+        if (
+            !Number.isFinite(config.orbCenterSize)
+            || config.orbCenterSize < 5
+            || config.orbCenterSize > 100
+        ) {
+
+            config.orbCenterSize =
+                defaults.orbCenterSize;
+
+        }
+
         config.orbColors =
             Array.isArray(config.orbColors)
                 ? config.orbColors
@@ -2817,83 +2970,164 @@ const orb =
 
 function buildOrbGradients(colors) {
 
-    const count =
-        colors.length;
-
-    const positions = [];
+    const count = colors.length;
 
     /*
-     * Evenly distribute the colors around
-     * the orb rather than being locked to
-     * exactly three positions.
+     * Make sure there is always at least one color.
      */
-
-    for (
-        let i = 0;
-        i < count;
-        i++
-    ) {
-
-        const angle =
-            (Math.PI * 2 * i) /
-            count;
-
-        const x =
-            Math.round(
-                50 +
-                Math.cos(angle - Math.PI / 2) * 27
-            );
-
-        const y =
-            Math.round(
-                50 +
-                Math.sin(angle - Math.PI / 2) * 27
-            );
-
-        positions.push({
-            x,
-            y
-        });
-
+    if (count === 0) {
+        colors = ["#4285f4"];
     }
 
+    /*
+     * ============================================================
+     * HARD COLORS / NO GRADIENT
+     * ============================================================
+     *
+     * Each color gets an equal section of the orb.
+     *
+     * Example with 4 colors:
+     *
+     *   0%   - 25%  = color 1
+     *   25%  - 50%  = color 2
+     *   50%  - 75%  = color 3
+     *   75%  - 100% = color 4
+     *
+     * The repeated stop positions create completely hard
+     * transitions with no blending between colors.
+     */
+    if (!CONFIG.orbGradient) {
 
-    const gradients =
-        colors.map(
+        const hardStops = colors.map(
             (color, index) => {
 
-                const position =
-                    positions[index];
+                const start =
+                    (index / colors.length) * 100;
 
-                const strength =
-                    Math.max(
-                        55,
-                        90 -
-                        count * 2
-                    );
-
-                const fade =
-                    Math.min(
-                        65,
-                        48 +
-                        count * 2
-                    );
+                const end =
+                    ((index + 1) / colors.length) * 100;
 
                 return `
-                    radial-gradient(
-                        circle at ${position.x}% ${position.y}%,
-                        color-mix(
-                            in srgb,
-                            ${color} ${strength}%,
-                            transparent
-                        ) 0%,
-                        transparent ${fade}%
-                    )
+                    ${color} ${start}%,
+                    ${color} ${end}%
                 `;
 
             }
         );
 
+        root.style.setProperty(
+            "--orb-background",
+            `
+                conic-gradient(
+                    from -90deg,
+                    ${hardStops.join(",")}
+                )
+            `
+        );
+
+    } else {
+
+        /*
+         * ========================================================
+         * NORMAL SMOOTH GRADIENT
+         * ========================================================
+         */
+
+        const positions = [];
+
+        /*
+         * Evenly distribute the colors around
+         * the orb rather than being locked to
+         * exactly three positions.
+         */
+        for (
+            let i = 0;
+            i < count;
+            i++
+        ) {
+
+            const angle =
+                (Math.PI * 2 * i) /
+                count;
+
+            const x =
+                Math.round(
+                    50 +
+                    Math.cos(
+                        angle - Math.PI / 2
+                    ) * 27
+                );
+
+            const y =
+                Math.round(
+                    50 +
+                    Math.sin(
+                        angle - Math.PI / 2
+                    ) * 27
+                );
+
+            positions.push({
+                x,
+                y
+            });
+
+        }
+
+        const gradients =
+            colors.map(
+                (color, index) => {
+
+                    const position =
+                        positions[index];
+
+                    const strength =
+                        Math.max(
+                            55,
+                            90 -
+                            count * 2
+                        );
+
+                    const fade =
+                        Math.min(
+                            65,
+                            48 +
+                            count * 2
+                        );
+
+                    return `
+                        radial-gradient(
+                            circle at
+                                ${position.x}%
+                                ${position.y}%,
+
+                            color-mix(
+                                in srgb,
+                                ${color}
+                                ${strength}%,
+                                transparent
+                            ) 0%,
+
+                            transparent
+                            ${fade}%
+                        )
+                    `;
+
+                }
+            );
+
+        root.style.setProperty(
+            "--orb-background",
+            gradients.join(",")
+        );
+
+    }
+
+
+    /*
+     * ============================================================
+     * AMBIENT COLORS
+     * ============================================================
+     */
 
     const ambientStops =
         colors.map(
@@ -2914,24 +3148,34 @@ function buildOrbGradients(colors) {
                 return `
                     color-mix(
                         in srgb,
-                        ${color} ${percentage}%,
+                        ${color}
+                        ${percentage}%,
                         transparent
-                    ) ${stop}%
+                    )
+                    ${stop}%
                 `;
 
             }
         );
 
 
+    /*
+     * ============================================================
+     * CENTER COLOR
+     * ============================================================
+     */
+
     const centerColor =
-        colors[0];
+        CONFIG.orbCenterEnabled
+            ? CONFIG.orbCenter
+            : "transparent";
 
 
-    root.style.setProperty(
-        "--orb-background",
-        gradients.join(",")
-    );
-
+    /*
+     * ============================================================
+     * APPLY AMBIENT
+     * ============================================================
+     */
 
     root.style.setProperty(
         "--orb-ambient",
@@ -2945,20 +3189,15 @@ function buildOrbGradients(colors) {
     );
 
 
+    /*
+     * ============================================================
+     * APPLY CENTER
+     * ============================================================
+     */
+
     root.style.setProperty(
         "--orb-center",
-        `
-            radial-gradient(
-                circle,
-                rgba(255,255,255,.38) 0%,
-                color-mix(
-                    in srgb,
-                    ${centerColor} 35%,
-                    transparent
-                ) 18%,
-                transparent 62%
-            )
-        `
+        centerColor
     );
 
 }
@@ -2988,6 +3227,11 @@ function applyConfig() {
     root.style.setProperty(
         "--orb-size",
         CONFIG.orbSize + "px"
+    );
+
+    root.style.setProperty(
+        "--orb-center-size",
+        CONFIG.orbCenterSize + "%"
     );
 
     root.style.setProperty(
@@ -4256,6 +4500,31 @@ const orbColors =
         "orbColors"
     );
 
+const orbCenter =
+    document.getElementById(
+        "orbCenter"
+    );
+
+const orbCenterPicker =
+    document.getElementById(
+        "orbCenterPicker"
+    );
+
+const orbCenterEnabled =
+    document.getElementById(
+        "orbCenterEnabled"
+    );
+
+const orbCenterSizeSetting =
+    document.getElementById(
+        "orbCenterSizeSetting"
+    );
+
+const orbCenterSizeValue =
+    document.getElementById(
+        "orbCenterSizeValue"
+    );
+
 const addOrbColor =
     document.getElementById(
         "addOrbColor"
@@ -4269,6 +4538,11 @@ const removeOrbColor =
 const colorCount =
     document.getElementById(
         "colorCount"
+    );
+
+const orbGradientSetting =
+    document.getElementById(
+        "orbGradientSetting"
     );
 
 const orbSizeSetting =
@@ -4416,6 +4690,81 @@ bindColor(
     accentPicker,
     "--accent"
 );
+
+
+/* ============================================================
+   ORB CENTER COLOR BINDING
+   ============================================================ */
+
+orbCenterPicker.addEventListener(
+    "input",
+    () => {
+
+        CONFIG.orbCenter =
+            orbCenterPicker.value;
+
+        orbCenter.value =
+            orbCenterPicker.value;
+
+        if (CONFIG.orbCenterEnabled) {
+
+            root.style.setProperty(
+                "--orb-center",
+                CONFIG.orbCenter
+            );
+
+        }
+
+    }
+);
+
+
+orbCenter.addEventListener(
+    "input",
+    () => {
+
+        if (validHex(orbCenter.value)) {
+
+            CONFIG.orbCenter =
+                orbCenter.value;
+
+            orbCenterPicker.value =
+                orbCenter.value;
+
+            if (CONFIG.orbCenterEnabled) {
+
+                root.style.setProperty(
+                    "--orb-center",
+                    CONFIG.orbCenter
+                );
+
+            }
+
+        }
+
+    }
+);
+
+
+orbCenterEnabled.addEventListener(
+    "change",
+    () => {
+
+        CONFIG.orbCenterEnabled =
+            orbCenterEnabled.value ===
+            "yes";
+
+        root.style.setProperty(
+            "--orb-center",
+            CONFIG.orbCenterEnabled
+                ? CONFIG.orbCenter
+                : "transparent"
+        );
+
+    }
+);
+
+
 
 
 /* ============================================================
@@ -4695,6 +5044,29 @@ blurSetting.addEventListener(
 );
 
 
+orbCenterSizeSetting.addEventListener(
+    "input",
+    () => {
+
+        const value =
+            Number(
+                orbCenterSizeSetting.value
+            );
+
+        orbCenterSizeValue.textContent =
+            value + "%";
+
+        CONFIG.orbCenterSize = value;
+
+        root.style.setProperty(
+            "--orb-center-size",
+            value + "%"
+        );
+
+    }
+);
+
+
 orbSizeSetting.addEventListener(
     "input",
     () => {
@@ -4899,6 +5271,33 @@ function openSettings() {
     renderOrbColorEditor();
 
 
+    orbCenter.value =
+        CONFIG.orbCenter;
+
+    orbCenterPicker.value =
+        validHex(CONFIG.orbCenter)
+            ? CONFIG.orbCenter
+            : DEFAULT_CONFIG.orbCenter;
+
+    orbCenterEnabled.value =
+        CONFIG.orbCenterEnabled
+            ? "yes"
+            : "no";
+
+
+    orbCenterSizeSetting.value =
+        CONFIG.orbCenterSize;
+
+    orbCenterSizeValue.textContent =
+        CONFIG.orbCenterSize + "%";
+
+
+    orbGradientSetting.value =
+        CONFIG.orbGradient
+            ? "yes"
+            : "no";
+
+
     orbSizeSetting.value =
         CONFIG.orbSize;
 
@@ -5076,6 +5475,28 @@ document.getElementById(
             ];
 
         }
+
+
+        CONFIG.orbCenter =
+            validHex(orbCenter.value)
+                ? orbCenter.value
+                : DEFAULT_CONFIG.orbCenter;
+
+
+        CONFIG.orbCenterEnabled =
+            orbCenterEnabled.value ===
+            "yes";
+
+
+        CONFIG.orbCenterSize =
+            Number(
+                orbCenterSizeSetting.value
+            );
+
+
+        CONFIG.orbGradient =
+            orbGradientSetting.value ===
+            "yes";
 
 
         CONFIG.orbSize =
