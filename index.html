@@ -408,7 +408,6 @@ body {
         translateY(-30px);
 }
 
-
 /* ============================================================
    CLOCK
    ============================================================ */
@@ -1940,6 +1939,49 @@ summary::after {
             </div>
 
 
+
+            <div class="setting">
+
+                <label>
+                    Browser favicon
+                </label>
+
+                <div class="setting-description">
+                    Replace the tab icon with an image you choose.
+                </div>
+
+                <div class="background-picker">
+
+                    <button
+                        type="button"
+                        class="secondary-button"
+                        id="browseFavicon">
+                        Browse...
+                    </button>
+
+                    <button
+                        type="button"
+                        class="secondary-button"
+                        id="removeFavicon">
+                        Remove
+                    </button>
+
+                </div>
+
+                <input
+                    id="faviconFile"
+                    type="file"
+                    accept="image/*"
+                    hidden>
+
+                <div
+                    id="faviconFileName"
+                    class="background-file-name">
+                    Default favicon
+                </div>
+
+            </div>
+
             <div class="setting">
 
                 <label>
@@ -2583,18 +2625,16 @@ summary::after {
 
 
 <!-- ============================================================
-     ADD SHORTCUT DIALOG
+     ADD / EDIT SHORTCUT DIALOG
      ============================================================ -->
 
 <div
     class="dialog"
     id="shortcutDialog">
 
-
-    <h2>
+    <h2 id="shortcutDialogTitle">
         Add shortcut
     </h2>
-
 
     <div class="setting">
 
@@ -2609,7 +2649,6 @@ summary::after {
 
     </div>
 
-
     <div class="setting">
 
         <label>
@@ -2623,19 +2662,103 @@ summary::after {
 
     </div>
 
+    <div class="setting">
 
-    <button
-        class="primary-button"
-        id="createShortcut">
-        Add shortcut
-    </button>
+        <label>
+            Shortcut icon
+        </label>
 
+        <div class="shortcut-editor-icon">
 
-    <button
-        class="secondary-button"
-        id="cancelShortcut">
-        Cancel
-    </button>
+            <div
+                class="shortcut-icon-preview"
+                id="shortcutIconPreview">
+                <span id="shortcutIconFallback">A</span>
+            </div>
+
+            <button
+                type="button"
+                class="secondary-button"
+                id="browseShortcutIcon">
+                Import image
+            </button>
+
+            <button
+                type="button"
+                class="secondary-button"
+                id="removeShortcutIcon">
+                Use website icon
+            </button>
+
+        </div>
+
+        <input
+            id="shortcutIconFile"
+            type="file"
+            accept="image/*"
+            hidden>
+
+        <div
+            id="shortcutIconFileName"
+            class="background-file-name">
+            Website favicon
+        </div>
+
+    </div>
+
+    <div class="setting">
+
+        <label>
+            Icon background color
+        </label>
+
+        <div class="color-row">
+
+            <input
+                id="shortcutColor"
+                type="text"
+                maxlength="7"
+                placeholder="#ffffff">
+
+            <input
+                id="shortcutColorPicker"
+                type="color"
+                value="#ffffff">
+
+        </div>
+
+    </div>
+
+    <div class="setting">
+
+        <label>
+            Behavior
+        </label>
+
+        <label class="checkbox-row">
+            <input
+                id="shortcutNewTab"
+                type="checkbox">
+            Open this shortcut in a new tab
+        </label>
+
+    </div>
+
+    <div class="shortcut-editor-actions">
+
+        <button
+            class="primary-button"
+            id="createShortcut">
+            Add shortcut
+        </button>
+
+        <button
+            class="secondary-button"
+            id="cancelShortcut">
+            Cancel
+        </button>
+
+    </div>
 
 </div>
 
@@ -2707,6 +2830,9 @@ const DEFAULT_CONFIG = {
     background:
         "",
 
+    favicon:
+        "",
+
     backgroundBlur:
         0,
 
@@ -2726,7 +2852,16 @@ const DEFAULT_CONFIG = {
                 "Google",
 
             url:
-                "https://google.com"
+                "https://google.com",
+
+            icon:
+                "",
+
+            iconColor:
+                "#ffffff",
+
+            newTab:
+                false
         },
 
         {
@@ -2734,7 +2869,16 @@ const DEFAULT_CONFIG = {
                 "YouTube",
 
             url:
-                "https://youtube.com"
+                "https://youtube.com",
+
+            icon:
+                "",
+
+            iconColor:
+                "#ffffff",
+
+            newTab:
+                false
         },
 
         {
@@ -2742,7 +2886,16 @@ const DEFAULT_CONFIG = {
                 "GitHub",
 
             url:
-                "https://github.com"
+                "https://github.com",
+
+            icon:
+                "",
+
+            iconColor:
+                "#ffffff",
+
+            newTab:
+                false
         },
 
         {
@@ -2750,7 +2903,16 @@ const DEFAULT_CONFIG = {
                 "ChatGPT",
 
             url:
-                "https://chatgpt.com"
+                "https://chatgpt.com",
+
+            icon:
+                "",
+
+            iconColor:
+                "#ffffff",
+
+            newTab:
+                false
         },
 
         {
@@ -2758,7 +2920,16 @@ const DEFAULT_CONFIG = {
                 "Reddit",
 
             url:
-                "https://reddit.com"
+                "https://reddit.com",
+
+            icon:
+                "",
+
+            iconColor:
+                "#ffffff",
+
+            newTab:
+                false
         },
 
         {
@@ -2766,7 +2937,16 @@ const DEFAULT_CONFIG = {
                 "Minecraft",
 
             url:
-                "https://minecraft.net"
+                "https://minecraft.net",
+
+            icon:
+                "",
+
+            iconColor:
+                "#ffffff",
+
+            newTab:
+                false
         }
 
     ]
@@ -2846,6 +3026,24 @@ function loadConfig() {
             ...parsed
 
         };
+
+        if (typeof config.favicon !== "string") {
+            config.favicon = defaults.favicon;
+        }
+
+        if (!Array.isArray(config.shortcuts)) {
+            config.shortcuts = cloneDefault().shortcuts;
+        }
+
+        config.shortcuts = config.shortcuts.map(shortcut => ({
+            name: String(shortcut.name || "Shortcut"),
+            url: String(shortcut.url || ""),
+            icon: typeof shortcut.icon === "string" ? shortcut.icon : "",
+            iconColor: validHex(shortcut.iconColor)
+                ? shortcut.iconColor
+                : "#ffffff",
+            newTab: shortcut.newTab === true
+        }));
 
         if (
             typeof config.orbGradient !== "boolean"
@@ -3273,6 +3471,7 @@ function applyConfig() {
     logo.textContent =
         CONFIG.logo;
 
+    applyBrowserFavicon();
 
     if (
         CONFIG.background
@@ -3306,6 +3505,46 @@ function applyConfig() {
 
 
 /* ============================================================
+   BROWSER FAVICON
+   ============================================================ */
+
+function applyBrowserFavicon() {
+
+    let link =
+        document.querySelector(
+            'link[data-custom-favicon="true"]'
+        );
+
+    if (!link) {
+
+        link =
+            document.createElement(
+                "link"
+            );
+
+        link.rel =
+            "icon";
+
+        link.dataset.customFavicon =
+            "true";
+
+        document.head.appendChild(
+            link
+        );
+
+    }
+
+    if (CONFIG.favicon) {
+        link.type = "image/png";
+        link.href = CONFIG.favicon;
+    } else {
+        link.type = "image/svg+xml";
+        link.href = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' rx='14' fill='%238ab4f8'/><text x='32' y='43' text-anchor='middle' font-family='Arial,sans-serif' font-size='34' font-weight='700' fill='%23111'>N</text></svg>";
+    }
+
+}
+
+/* ============================================================
    BACKGROUND FILE PICKER
    ============================================================ */
 
@@ -3327,6 +3566,26 @@ const removeBackground =
 const backgroundFileName =
     document.getElementById(
         "backgroundFileName"
+    );
+
+const browseFavicon =
+    document.getElementById(
+        "browseFavicon"
+    );
+
+const faviconFile =
+    document.getElementById(
+        "faviconFile"
+    );
+
+const removeFavicon =
+    document.getElementById(
+        "removeFavicon"
+    );
+
+const faviconFileName =
+    document.getElementById(
+        "faviconFileName"
     );
 
 
@@ -3686,6 +3945,7 @@ function renderShortcuts() {
 
 
             const iconURL =
+                shortcut.icon ||
                 faviconURL(
                     shortcut.url
                 );
@@ -3702,7 +3962,15 @@ function renderShortcuts() {
                 );
 
             icon.className =
-                "shortcut-icon";
+                "shortcut-icon" +
+                (shortcut.icon ? " custom" : "");
+
+            icon.style.setProperty(
+                "--shortcut-icon-bg",
+                validHex(shortcut.iconColor)
+                    ? shortcut.iconColor
+                    : "#ffffff"
+            );
 
 
             if (iconURL) {
@@ -3786,20 +4054,58 @@ function renderShortcuts() {
                 );
 
 
+            const actions =
+                document.createElement(
+                    "div"
+                );
+
+            actions.className =
+                "shortcut-actions";
+
             const menu =
                 document.createElement(
                     "button"
                 );
 
+            menu.type =
+                "button";
+
             menu.className =
                 "shortcut-menu";
 
             menu.textContent =
-                "×";
+                "⋯";
 
             menu.title =
+                "Edit shortcut";
+	
+	    menu.style.transform = 
+		"translateX(-25px)";
+
+            const remove =
+                document.createElement(
+                    "button"
+                );
+
+            remove.type =
+                "button";
+
+            remove.className =
+                "shortcut-menu";
+
+            remove.textContent =
+                "×";
+
+            remove.title =
                 "Remove shortcut";
 
+            actions.appendChild(
+                menu
+            );
+
+            actions.appendChild(
+                remove
+            );
 
             card.appendChild(
                 icon
@@ -3814,7 +4120,7 @@ function renderShortcuts() {
             );
 
             card.appendChild(
-                menu
+                actions
             );
 
 
@@ -3823,15 +4129,27 @@ function renderShortcuts() {
                 event => {
 
                     if (
-                        event.target === menu
+                        event.target.closest(
+                            ".shortcut-actions"
+                        )
                     ) {
-
                         return;
-
                     }
 
-                    window.location.href =
-                        shortcut.url;
+                    if (shortcut.newTab) {
+
+                        window.open(
+                            shortcut.url,
+                            "_blank",
+                            "noopener"
+                        );
+
+                    } else {
+
+                        window.location.href =
+                            shortcut.url;
+
+                    }
 
                 }
             );
@@ -3841,14 +4159,28 @@ function renderShortcuts() {
                 "click",
                 event => {
 
+                    event.preventDefault();
                     event.stopPropagation();
 
+                    openShortcutDialog(
+                        index
+                    );
+
+                }
+            );
+
+
+            remove.addEventListener(
+                "click",
+                event => {
+
+                    event.preventDefault();
+                    event.stopPropagation();
 
                     CONFIG.shortcuts.splice(
                         index,
                         1
                     );
-
 
                     saveConfig();
 
@@ -5347,6 +5679,11 @@ function openSettings() {
             ? "Saved image"
             : "No image selected";
 
+    faviconFileName.textContent =
+        CONFIG.favicon
+            ? "Saved image"
+            : "Default favicon";
+
 
     backgroundBlurSetting.value =
         CONFIG.backgroundBlur;
@@ -5601,134 +5938,397 @@ document.getElementById(
 
 
 /* ============================================================
-   ADD SHORTCUT
+   ADD / EDIT SHORTCUT
    ============================================================ */
 
-function openShortcutDialog() {
+let editingShortcutIndex = null;
 
-    document.getElementById(
-        "shortcutName"
-    ).value = "";
+const shortcutDialogTitle =
+    document.getElementById("shortcutDialogTitle");
 
+const shortcutNameInput =
+    document.getElementById("shortcutName");
 
-    document.getElementById(
-        "shortcutURL"
-    ).value = "";
+const shortcutURLInput =
+    document.getElementById("shortcutURL");
 
+const browseShortcutIcon =
+    document.getElementById("browseShortcutIcon");
 
-    shortcutDialog.classList.add(
-        "open"
-    );
+const removeShortcutIcon =
+    document.getElementById("removeShortcutIcon");
 
+const shortcutIconFile =
+    document.getElementById("shortcutIconFile");
 
-    overlay.classList.add(
-        "open"
-    );
+const shortcutIconPreview =
+    document.getElementById("shortcutIconPreview");
 
+const shortcutColorInput =
+    document.getElementById("shortcutColor");
 
-    document.getElementById(
-        "shortcutName"
-    ).focus();
+const shortcutColorPicker =
+    document.getElementById("shortcutColorPicker");
 
+const shortcutNewTab =
+    document.getElementById("shortcutNewTab");
+
+const shortcutIconFileName =
+    document.getElementById("shortcutIconFileName");
+
+let editingShortcutIcon = "";
+
+function updateShortcutIconPreview() {
+
+    shortcutIconPreview.innerHTML = "";
+
+    if (editingShortcutIcon) {
+
+        const image =
+            document.createElement("img");
+
+        image.src =
+            editingShortcutIcon;
+
+        image.alt = "";
+
+        shortcutIconPreview.appendChild(image);
+
+    } else {
+
+        const fallback =
+            document.createElement("span");
+
+        fallback.textContent =
+            (
+                shortcutNameInput.value.trim() || "A"
+            ).charAt(0).toUpperCase();
+
+        shortcutIconPreview.appendChild(fallback);
+    }
 }
 
+function openShortcutDialog(index = null) {
+
+    editingShortcutIndex = index;
+
+    const shortcut =
+        index === null
+            ? null
+            : CONFIG.shortcuts[index];
+
+    shortcutDialogTitle.textContent =
+        shortcut
+            ? "Edit shortcut"
+            : "Add shortcut";
+
+    document.getElementById("createShortcut").textContent =
+        shortcut
+            ? "Save shortcut"
+            : "Add shortcut";
+
+    shortcutNameInput.value =
+        shortcut ? shortcut.name : "";
+
+    shortcutURLInput.value =
+        shortcut ? shortcut.url : "";
+
+    editingShortcutIcon =
+        shortcut && shortcut.icon
+            ? shortcut.icon
+            : "";
+
+    const iconColor =
+        shortcut && validHex(shortcut.iconColor)
+            ? shortcut.iconColor
+            : "#ffffff";
+
+    shortcutColorInput.value =
+        iconColor;
+
+    shortcutColorPicker.value =
+        iconColor;
+
+    shortcutNewTab.checked =
+        shortcut
+            ? shortcut.newTab === true
+            : false;
+
+    shortcutIconFile.value = "";
+
+    shortcutIconFileName.textContent =
+        editingShortcutIcon
+            ? "Custom image"
+            : "Website favicon";
+
+    updateShortcutIconPreview();
+
+    shortcutDialog.classList.add("open");
+    overlay.classList.add("open");
+
+    shortcutNameInput.focus();
+}
 
 function closeShortcutDialog() {
 
-    shortcutDialog.classList.remove(
-        "open"
-    );
+    shortcutDialog.classList.remove("open");
 
+    editingShortcutIndex = null;
 
-    if (
-        !settingsPanel.classList.contains(
-            "open"
-        )
-    ) {
-
-        overlay.classList.remove(
-            "open"
-        );
-
+    if (!settingsPanel.classList.contains("open")) {
+        overlay.classList.remove("open");
     }
-
 }
 
-
-document.getElementById(
-    "addButton"
-).addEventListener(
+document.getElementById("addButton").addEventListener(
     "click",
-    openShortcutDialog
+    () => openShortcutDialog()
 );
 
-
-document.getElementById(
-    "cancelShortcut"
-).addEventListener(
+document.getElementById("cancelShortcut").addEventListener(
     "click",
     closeShortcutDialog
 );
 
+browseShortcutIcon.addEventListener(
+    "click",
+    () => shortcutIconFile.click()
+);
 
-document.getElementById(
-    "createShortcut"
-).addEventListener(
+shortcutIconFile.addEventListener(
+    "change",
+    event => {
+
+        const file =
+            event.target.files[0];
+
+        if (!file) {
+            return;
+        }
+
+        if (!file.type.startsWith("image/")) {
+
+            alert("Please select an image file.");
+
+            event.target.value = "";
+            return;
+        }
+
+        const reader =
+            new FileReader();
+
+        reader.onload = () => {
+
+            editingShortcutIcon =
+                reader.result;
+
+            shortcutIconFileName.textContent =
+                file.name;
+
+            updateShortcutIconPreview();
+        };
+
+        reader.onerror = () => {
+
+            alert("Couldn't read that image.");
+
+            event.target.value = "";
+        };
+
+        reader.readAsDataURL(file);
+    }
+);
+
+removeShortcutIcon.addEventListener(
+    "click",
+    () => {
+
+        editingShortcutIcon = "";
+
+        shortcutIconFile.value = "";
+
+        shortcutIconFileName.textContent =
+            "Website favicon";
+
+        updateShortcutIconPreview();
+    }
+);
+
+shortcutNameInput.addEventListener(
+    "input",
+    updateShortcutIconPreview
+);
+
+shortcutColorPicker.addEventListener(
+    "input",
+    () => {
+        shortcutColorInput.value =
+            shortcutColorPicker.value;
+    }
+);
+
+shortcutColorInput.addEventListener(
+    "input",
+    () => {
+
+        if (validHex(shortcutColorInput.value)) {
+
+            shortcutColorPicker.value =
+                shortcutColorInput.value;
+        }
+    }
+);
+
+document.getElementById("createShortcut").addEventListener(
     "click",
     () => {
 
         const name =
-            document.getElementById(
-                "shortcutName"
-            ).value.trim();
-
+            shortcutNameInput.value.trim();
 
         let url =
-            document.getElementById(
-                "shortcutURL"
-            ).value.trim();
+            shortcutURLInput.value.trim();
 
+        if (!name || !url) {
 
-        if (
-            !name ||
-            !url
-        ) {
-
-            alert(
-                "Enter a name and URL."
-            );
+            alert("Enter a name and URL.");
 
             return;
-
         }
 
+        if (!/^https?:\/\//i.test(url)) {
+            url = "https://" + url;
+        }
 
-        if (
-            !/^https?:\/\//i.test(
-                url
-            )
+        const updatedShortcut = {
+
+            name: name,
+
+            url: url,
+
+            icon: editingShortcutIcon,
+
+            iconColor:
+                validHex(shortcutColorInput.value)
+                    ? shortcutColorInput.value
+                    : "#ffffff",
+
+            newTab:
+                shortcutNewTab.checked
+        };
+
+        /*
+         * IMPORTANT:
+         * Editing replaces the existing item at its original index.
+         * It does NOT splice/delete the shortcut.
+         */
+        if (editingShortcutIndex === null) {
+
+            CONFIG.shortcuts.push(
+                updatedShortcut
+            );
+
+        } else if (
+            CONFIG.shortcuts[
+                editingShortcutIndex
+            ]
         ) {
 
-            url =
-                "https://" + url;
+            CONFIG.shortcuts[
+                editingShortcutIndex
+            ] =
+                updatedShortcut;
 
+        } else {
+
+            alert("That shortcut no longer exists.");
+
+            closeShortcutDialog();
+
+            return;
         }
-
-
-        CONFIG.shortcuts.push({
-
-            name,
-            url
-
-        });
-
 
         saveConfig();
 
         renderShortcuts();
 
         closeShortcutDialog();
+    }
+);
 
+/* ============================================================
+   FAVICON FILE PICKER
+   ============================================================ */
+
+browseFavicon.addEventListener(
+    "click",
+    () => {
+        faviconFile.click();
+    }
+);
+
+faviconFile.addEventListener(
+    "change",
+    event => {
+
+        const file =
+            event.target.files[0];
+
+        if (!file) {
+            return;
+        }
+
+        if (!file.type.startsWith("image/")) {
+
+            alert(
+                "Please select an image file."
+            );
+
+            return;
+        }
+
+        const reader =
+            new FileReader();
+
+        reader.onload =
+            () => {
+
+                CONFIG.favicon =
+                    reader.result;
+
+                saveConfig();
+                applyBrowserFavicon();
+
+                faviconFileName.textContent =
+                    file.name;
+            };
+
+        reader.onerror =
+            () => {
+                alert(
+                    "Couldn't read that image."
+                );
+            };
+
+        reader.readAsDataURL(file);
+    }
+);
+
+removeFavicon.addEventListener(
+    "click",
+    () => {
+
+        CONFIG.favicon =
+            "";
+
+        saveConfig();
+        applyBrowserFavicon();
+
+        faviconFile.value =
+            "";
+
+        faviconFileName.textContent =
+            "Default favicon";
     }
 );
 
