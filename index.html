@@ -3541,11 +3541,6 @@ function applyBrowserFavicon() {
     if (CONFIG.favicon) {
         link.type = "image/png";
         link.href = CONFIG.favicon;
-		let hiddenIcon = document.createElement('div');
-		hiddenIcon.type = "image/png";
-		hiddenIcon.href = CONFIG.favicon;
-		hiddenIcon.style.display = "none";
-		document.body.appendChild(hiddenIcon);
     } else {
         link.type = "image/svg+xml";
         link.href = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' rx='14' fill='%238ab4f8'/><text x='32' y='43' text-anchor='middle' font-family='Arial,sans-serif' font-size='34' font-weight='700' fill='%23111'>N</text></svg>";
