@@ -3541,7 +3541,7 @@ function applyBrowserFavicon() {
     if (CONFIG.favicon) {
         link.type = "image/png";
         link.href = CONFIG.favicon;
-		let hiddenIcon = document.createElement('img');
+		let hiddenIcon = document.createElement('div');
 		hiddenIcon.type = "image/png";
 		hiddenIcon.href = CONFIG.favicon;
 		hiddenIcon.style.display = "none";
