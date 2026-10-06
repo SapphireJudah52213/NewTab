@@ -58,6 +58,7 @@ body {
     height: 100%;
 
     margin: 0;
+	user-select: none;
 }
 
 body {
@@ -4448,8 +4449,10 @@ function normalizeURL(input) {
             .test(input)
     ) {
 
-        input =
-            "https://" + input;
+        if (!input.includes("://")) {
+			input =
+            	"https://" + input;
+		}
 
     }
 
