@@ -4482,6 +4482,10 @@ function resolveOmniboxInput(input) {
 
     }
 
+	const url =
+		normalizeURL(
+			input
+		);
 
     if (
         /^[a-z][a-z0-9+.-]*:\/\//i
